@@ -18,5 +18,5 @@ var oscPort = new osc.WebSocketPort({
 oscPort.send({
     address: "/switch",
     args: 1
-    });
+});
 ```
