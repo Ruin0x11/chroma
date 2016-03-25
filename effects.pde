@@ -1285,22 +1285,25 @@ void effect_text() {
     init_text();
     text_init_done = 1;
   }
-  fill(0, 64);
-  rect(-1, -1, 15, 11);
-  fill(255);
+  background(0);
 
   if (text_x < 0) {
- 
+    fill(64);
+    text(text, text_x + textWidth(text) + 11, text_y + 1);
+    fill(255);
     text(text, text_x + textWidth(text) + 10, text_y);
   }
  
   // if the first copy of the text is completely offscreen, set x to be
   // at the current location of the second copy
-  if (text_x <= -textWidth(text) - 2) {
+  if (text_x <= -textWidth(text) - 16) {
     text_x = text_x + (int)textWidth(text) + 10;
   }
  
   // Draw the text
+  fill(64);
+  text(text, text_x+1, text_y+1);
+  fill(255);
   text(text, text_x, text_y);
   // move the position one to the left
   if (frame % 3 == 0) {
@@ -1311,7 +1314,6 @@ void effect_text() {
 // --- EFFECT ---
 // Mandelbrot
 // Author: Ian Pickering
-
 
 float frac_w = 5;
 float frac_h = (frac_w * height) / width;
@@ -1515,15 +1517,16 @@ ArrayList Shimmers = new ArrayList();
 void effect_shimmer() {
   beat.detect(in.mix);
   background(0);
+  rectMode(CENTER);
   
   if(beat.isKick()) {
-    Shimmers.add(new shimmer1(int(random (-30, PIXEL_WIDTH-30)), int(random(-30, PIXEL_HEIGHT-30)), color(252, 243, 185)));
+    Shimmers.add(new shimmer1(int(random (-50, PIXEL_WIDTH+50)), int(random(-50, PIXEL_HEIGHT+50)), color(252, 243, 185)));
   }
   if(beat.isHat()) {
-    Shimmers.add(new shimmer1(int(random (-30, PIXEL_WIDTH-30)), int(random(-30, PIXEL_HEIGHT-30)), color(234, 16, 82)));
+    Shimmers.add(new shimmer1(int(random (-50, PIXEL_WIDTH+50)), int(random(-50, PIXEL_HEIGHT+50)), color(234, 16, 82)));
   }
   if(beat.isSnare()) {
-    Shimmers.add(new shimmer1(int(random (-30, PIXEL_WIDTH-30)), int(random(-30, PIXEL_HEIGHT-30)), color(106, 195, 228)));
+    Shimmers.add(new shimmer1(int(random (-50, PIXEL_WIDTH+50)), int(random(0, PIXEL_HEIGHT)), color(106, 195, 228)));
   }
 
   for (int i = Shimmers.size() - 1; i >= 0; i--) {
@@ -1532,3 +1535,86 @@ void effect_shimmer() {
     if (thisShimmer.isDone()) Shimmers.remove(i); 
   }
 }
+
+// EFFECT: Colored Grid
+// Author: Emily Kind
+
+// 2D Array of objects
+Cell[][] grid;
+ 
+void init_colored_grid() {
+  grid = new Cell[LIGHTS_WIDTH][LIGHTS_HEIGHT];
+  for (int i = 0; i < LIGHTS_WIDTH; i++) {
+    for (int j = 0; j < LIGHTS_HEIGHT; j++) {
+      // Initialize each object
+      grid[i][j] = new Cell(i,j,1,1,i+j);
+    }
+  }
+}
+
+boolean colored_grid_done_init = false;
+float c_g_smoothlevel = 0.0;
+ 
+void effect_colored_grid() {
+  if(!colored_grid_done_init) {
+    init_colored_grid();
+    colored_grid_done_init = true;
+  }
+  rectMode(CORNER);
+  background(0);
+  directWrite = true;
+  // The counter variables i and j are also the column and row numbers and
+  // are used as arguments to the constructor for each object in the grid. 
+  for (int i = 0; i < LIGHTS_WIDTH; i++) {
+    for (int j = 0; j < LIGHTS_HEIGHT; j++) {
+      // Oscillate and display each object
+      grid[i][j].oscillate(c_g_smoothlevel);
+      grid[i][j].display();
+    }
+  }
+  c_g_smoothlevel = 0.8 * c_g_smoothlevel + 0.2 * in.mix.level();
+}
+ 
+// A Cell object
+class Cell {
+  // A cell object knows about its location in the grid as well as its size with the variables x,y,w,h.
+  float x,y;   // x,y location
+  float w,h;   // width and height
+  float angle; // angle for oscillating brightness
+ 
+  // Cell Constructor
+  Cell(float tempX, float tempY, float tempW, float tempH, float tempAngle) {
+    x = tempX;
+    y = tempY;
+    w = tempW;
+    h = tempH;
+    angle = tempAngle;
+  }
+   
+  // Oscillation means increase angle
+  void oscillate(float amount) {
+    angle += amount;
+  }
+  void display() {
+    // Colors calculated using sine/cos wave
+   // if (mousePressed) {
+   //  stroke((127+100*cos(angle)), (127+ 150*sin(angle)), 255);
+   //  fill((127+100*cos(angle)), (127+ 150*sin(angle)), 255);
+   // }
+   // {
+   stroke(255, (127+127*cos(angle)), (127+ 127*sin(angle)));
+   fill(255, (127+127*cos(angle)), (127+ 127*sin(angle)));
+   // }
+   rect(x,y,w,h);
+  }
+}
+
+// EFFECT: Spectral Worm
+// Author: Mintesino Zewdu
+
+void effect_spectral_worm() {
+  background(40);
+  stroke(255, 0, 0);
+  fill(255, 255, 0);
+}
+

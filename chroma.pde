@@ -103,7 +103,7 @@ boolean imgSelected = false;
 boolean directWrite = false;
 
 int selectedEffect = 0;
-int maxEffects = 23;
+int maxEffects = 24;
 void draw () {
 
   if (hueCycleable) {
@@ -188,13 +188,16 @@ void draw () {
     effect_text();
     break;
   case 21:
-    effect_mandelbrot();
+    effect_colored_grid();
     break;
   case 22:
     effect_gradient();
     break;
   case 23:
     effect_shimmer();
+    break;
+  case 24:
+    effect_spectral_worm();
     break;
   }
 
