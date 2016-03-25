@@ -43,8 +43,8 @@ void effect_RotoZoom() {
   rot_alpha = radians(rotAlpha);
   rot_zoom = radians(rotZoom);
   img_zoom = sin(rot_zoom) * 3;
-  xx = cos(rot_alpha)*img_zoom*16;
-  yy = sin(rot_alpha)*img_zoom*16;
+  xx = cos(rot_alpha)*img_zoom*LIGHTS_WIDTH;
+  yy = sin(rot_alpha)*img_zoom*LIGHTS_WIDTH;
 
   int imageSize = rotozoom.width;
   background(0);
@@ -100,7 +100,7 @@ void effect_Plasma()
   for (int y=0; y< height/2; y++) {
     for (int x=0; x< width; x++) {
       c=sin(x / 40.74 + t);
-      c+=sin(dist(x, y, (250 * (pscale+0.1) * sin(-t) + 160), (250 * (pscale+0.1) * cos(-t) + 80)) / 40.74);
+      c+=sin(dist(x, y, (250 * (pscale+0.1) * sin(-t) + PIXEL_HEIGHT), (250 * (pscale+0.1) * cos(-t) + 80)) / 40.74);
       c=abs((127+(c*127)) %  256);
       plasma.set(x,y, plasma_pallet[int(c)]);
     }
@@ -120,8 +120,8 @@ void effect_Plasma()
 PImage tunnel;
 int tunnel_init_done =0;
 float smoothlevel = 0;
-float[][] angle_lut = new float[160][320];
-float[][] depth_lut = new float[160][320];
+float[][] angle_lut = new float[PIXEL_HEIGHT][PIXEL_WIDTH];
+float[][] depth_lut = new float[PIXEL_HEIGHT][PIXEL_WIDTH];
 int texture_width;
 int texture_height;
 int tunnel_rotated = 0;
@@ -205,7 +205,7 @@ void effect_square() {
   
   //background(0);
   //fill(0,10);
-  //rect(0,0,320,160);
+  //rect(0,0,PIXEL_WIDTH,PIXEL_HEIGHT);
 
   if ( beat.isKick() ) {
     Squares.add(new square1(width/2,height/4,squareHue));
@@ -266,7 +266,7 @@ void effect_bouncers() {
   
   fill(0,10); //
   rectMode(CORNER);
-  rect(0,0,320,160);
+  rect(0,0,PIXEL_WIDTH,PIXEL_HEIGHT);
   rectMode(CENTER);
   if ( beat.isKick() ) {
     Bouncers.add(new Bouncer(180,80,bounceHue));
@@ -301,10 +301,10 @@ class Bouncer {
   
   void update() {
     if (!finished) {
-      if(xpos + vx>320 || xpos + vx < 0){
+      if(xpos + vx>PIXEL_WIDTH || xpos + vx < 0){
         vx *= -1; 
       }
-      if(ypos + vy>160 || ypos + vy < 0){
+      if(ypos + vy>PIXEL_HEIGHT || ypos + vy < 0){
         vy *= -1;
       }      
       
@@ -356,7 +356,7 @@ float suns_smoothfft = 0;
 
 void effect_suns() {
   if(!setupSuns) {
-    pgSuns = createGraphics(160, 90, JAVA2D);
+    pgSuns = createGraphics(LIGHTS_WIDTH*10, LIGHTS_HEIGHT*10, JAVA2D);
     vy = new int[numBlobs][pgSuns.height];
     vx = new int[numBlobs][pgSuns.width];
 
@@ -421,7 +421,7 @@ void effect_suns() {
   pgSuns.updatePixels();
   pgSuns.endDraw();
 
-  image(pgSuns, 0, 0, 320, 160);
+  image(pgSuns, 0, 0, PIXEL_WIDTH, PIXEL_HEIGHT);
 }
 
 // --- EFFECT ---
@@ -509,7 +509,7 @@ void effect_fire() {
   pgFire.updatePixels();
   pgFire.endDraw();
 
-  image(pgFire, 0, 0, 320, 160);
+  image(pgFire, 0, 0, PIXEL_WIDTH, PIXEL_HEIGHT);
   colorMode(RGB, 255);
 }
 
@@ -523,8 +523,8 @@ class Circle {
   float _v;
 
   Circle(float v) {
-    _x = (int)random(320);
-    _y = (int)random(160);
+    _x = (int)random(PIXEL_WIDTH);
+    _y = (int)random(PIXEL_HEIGHT);
     _r = (int)random(40);
     _h = (int)random(255); 
     _v = v;
@@ -586,7 +586,7 @@ void effect_bubbles_cmooney() {
 // Author: Charles Mooney
 // www.charlesmooney.com
 
-int num_bands_rainbow = 16;
+int num_bands_rainbow = LIGHTS_WIDTH;
 float scaling_factor = 24.0;
 
 void effect_plaid() {
@@ -612,7 +612,7 @@ void effect_plaid() {
 // www.charlesmooney.com
 
 int[] row = new int[32];
-Spectrogram spec = new Spectrogram(32, 32);
+Spectrogram spec = new Spectrogram(14, 32);
 
 class Spectrogram {
     Spectrogram(int w, int h) {
@@ -711,9 +711,9 @@ void effect_perlin(float divider, float lr, float lg, float lb) {
     dampenSnare = 1;
   }
   if (beat.isHat()) dampenHat = 1;
-  for (int y = 0; y <= 8; y++) {
+  for (int y = 0; y <= LIGHTS_HEIGHT; y++) {
     j = y * divider;
-    for (int x=0; x <= 16; x++) {      
+    for (int x=0; x <= LIGHTS_WIDTH; x++) {      
       i = x*divider;
       r =perlin (j, i,    offset, lr, 0.80)*dampenKick;
       g =perlin (j, i+10, offset, lg, 0.75)*dampenSnare;
@@ -758,8 +758,8 @@ void effect_quinn() {
      x[band] += ((int)random(50)-25);
      y[band] += ((int)random(40)-20);
     
-     x[band] = min(320, max(0, x[band]));  
-     y[band] = min(160, max(0, y[band]));
+     x[band] = min(PIXEL_WIDTH, max(0, x[band]));  
+     y[band] = min(PIXEL_HEIGHT, max(0, y[band]));
     
      fill(band * 256 / num_bands_quinn, 255, 2550);
      ellipse(x[band], y[band], val, val);
@@ -1266,3 +1266,269 @@ void effect_waveform() {
 // --- EFFECT ---
 // Dual VU Meter
 // Draws a stereo VU meter
+
+
+// --- EFFECT ---
+// Text
+// Author: Ian Pickering
+
+String text = "ACM @ UIUC";
+PFont font;
+int text_init_done = 0;
+int text_x = 14;
+int text_y = 8;
+
+void effect_text() {
+  directWrite = true;
+  if (text_init_done == 0) {
+    println("init text");
+    init_text();
+    text_init_done = 1;
+  }
+  fill(0, 64);
+  rect(-1, -1, 15, 11);
+  fill(255);
+
+  if (text_x < 0) {
+ 
+    text(text, text_x + textWidth(text) + 10, text_y);
+  }
+ 
+  // if the first copy of the text is completely offscreen, set x to be
+  // at the current location of the second copy
+  if (text_x <= -textWidth(text) - 2) {
+    text_x = text_x + (int)textWidth(text) + 10;
+  }
+ 
+  // Draw the text
+  text(text, text_x, text_y);
+  // move the position one to the left
+  if (frame % 3 == 0) {
+    text_x--;
+  }
+}
+
+// --- EFFECT ---
+// Mandelbrot
+// Author: Ian Pickering
+
+
+float frac_w = 5;
+float frac_h = (frac_w * height) / width;
+
+int frac_pixw = PIXEL_WIDTH;
+int frac_pixh = PIXEL_HEIGHT;
+
+PGraphics frac;
+
+float frac_zoom = 1.0;
+float frac_zoomdelta = 0.990;
+
+float frac_offx = -0.5;
+float frac_offy = -0.5514;
+
+// Start at negative half the width and height
+float frac_xmin = frac_w * -0.5;
+float frac_ymin = frac_h * -0.5;
+
+boolean setup_frac = false;
+
+// Maximum number of iterations for each point on the complex plane
+int frac_maxiterations = 100;
+
+// x goes from xmin to xmax
+float frac_xmax = frac_xmin + frac_w;
+// y goes from ymin to ymax
+float frac_ymax = frac_ymin + frac_h;
+
+// Calculate amount we increment x,y for each pixel
+float frac_dx = (frac_xmax - frac_xmin) / (frac_pixw);
+float frac_dy = (frac_ymax - frac_ymin) / (frac_pixh);
+
+void effect_mandelbrot() {
+  if(!setup_frac) {
+    frac = createGraphics(frac_pixw, frac_pixh, JAVA2D);
+    setup_frac = true;
+  }
+
+  /* frac_xmax = frac_xmin + frac_w; */
+  /* frac_ymax = frac_ymin + frac_h; */
+  frac_dx = (frac_xmax - frac_xmin) / (frac_pixw);
+  frac_dy = (frac_ymax - frac_ymin) / (frac_pixh);
+
+  frac.beginDraw();
+  frac.loadPixels();
+  
+  // Start y
+  float y = frac_ymin + frac_offx;
+  for (int j = 0; j < frac_pixh; j++) {
+    // Start x
+    float x = frac_xmin + frac_offy;
+    for (int i = 0; i < frac_pixw; i++) {
+
+      // Now we test, as we iterate z = z^2 + cm does z tend towards infinity?
+      float a = x;
+      float b = y;
+      int n = 0;
+      while (n < frac_maxiterations) {
+        float aa = a * a;
+        float bb = b * b;
+        float twoab = 2.0 * a * b;
+        a = aa - bb + x;
+        b = twoab + y;
+        // Infinty in our finite world is simple, let's just consider it 16
+        if (aa + bb > 16.0) {
+          break;  // Bail
+        }
+        n++;
+      }
+      // We color each pixel based on how long it takes to get to infinity
+      // If we never got there, let's pick the color black
+      if (n == frac_maxiterations) {
+        frac.pixels[i+j*frac_pixw] = color(0);
+      } else {
+        // Gosh, we could make fancy colors here if we wanted
+        frac.pixels[i+j*frac_pixw] = color(n*10 % 255,(n*10+50) % 255,(n*10+150) % 255);
+      }
+      x += frac_dx;
+    }
+    y += frac_dy;
+  }
+  frac.updatePixels();
+  frac.endDraw();
+  image(frac, 0, 0, PIXEL_WIDTH, PIXEL_HEIGHT);
+  frac_xmin *= frac_zoomdelta;
+  frac_ymin *= frac_zoomdelta;
+  frac_xmax *= frac_zoomdelta;
+  frac_ymax *= frac_zoomdelta;
+}
+
+// --- EFFECT ---
+// Gradient
+// Author: Ian Pickering
+
+
+class gradient1 {
+  int Y_AXIS = 1;
+  int X_AXIS = 2;
+  color c1, c2, b1, b2;
+  int pos_x;
+
+  public gradient1(color c) {
+    this.c1 = color(0, 255);
+    this.c2 = c;
+    this.pos_x = -280;
+  }
+
+  void setGradient(int x, int y, float w, float h, color c1, color c2, int axis ) {
+
+    noFill();
+
+    if (axis == Y_AXIS) {  // Top to bottom gradient
+      for (int i = y; i <= y+h; i++) {
+        float inter = map(i, y, y+h, 0, 1);
+        color c = lerpColor(c1, c2, inter);
+        stroke(c);
+        line(x, i, x+w, i);
+      }
+    }  
+    else if (axis == X_AXIS) {  // Left to right gradient
+      for (int i = x; i <= x+w; i++) {
+        float inter = map(i, x, x+w, 0, 1);
+        color c = lerpColor(c1, c2, inter);
+        stroke(c);
+        line(i, y, i, y+h);
+      }
+    }
+  }
+
+  void update() {
+    this.pos_x += 20;
+    setGradient(this.pos_x, 0, 280, 200, this.c1, this.c2, X_AXIS);
+    /* setGradient(this.pos_x + 280, 0, 40, 200, this.c2, this.c1, X_AXIS); */
+  }
+
+  boolean isDone() {
+    return this.pos_x > 280;
+  }
+}
+
+boolean gradient_init_done = false;
+ArrayList Gradients = new ArrayList();
+
+void effect_gradient() {
+  /* directWrite = true; */
+  beat.detect(in.mix);
+  background(0);
+
+  if(beat.isKick()) {
+    Gradients.add(new gradient1(color(0,0,255)));
+  }
+
+  /* for (int i = Gradients.size() - 1; i >= 0; i--) { */
+  for (int i=0; i < Gradients.size();  i++) {
+    gradient1 thisGradient = (gradient1) Gradients.get(i);
+    thisGradient.update();
+    if (thisGradient.isDone()) {Gradients.remove (i); i--;} 
+  }
+    
+}
+
+class shimmer1 {
+  int xpos, ypos;
+  color sqcolor;
+  int age;
+
+  int STEP_TIME = 20;
+  int HOLD_TIME = 10;
+  int MAX_AGE = 160;
+
+  shimmer1(int x, int y, int c) {
+    xpos = x;
+    ypos = y;
+    sqcolor = c;
+    age = 0;
+  }
+
+  void update() {
+    noStroke();
+    float fin = 0;
+    age++;
+    if(age < STEP_TIME) {
+      fin = (255/STEP_TIME) * age;
+    } else if(age < STEP_TIME + HOLD_TIME) {
+      fin = 255;
+    } else {
+      fin = (255/MAX_AGE) * (MAX_AGE-(age-STEP_TIME*2-HOLD_TIME*2));
+    }
+    fill(sqcolor, fin);
+    rect(xpos,ypos,100,100);
+  }
+
+  boolean isDone() {
+    return age > MAX_AGE;
+  }
+}
+
+ArrayList Shimmers = new ArrayList();
+
+void effect_shimmer() {
+  beat.detect(in.mix);
+  background(0);
+  
+  if(beat.isKick()) {
+    Shimmers.add(new shimmer1(int(random (-30, PIXEL_WIDTH-30)), int(random(-30, PIXEL_HEIGHT-30)), color(252, 243, 185)));
+  }
+  if(beat.isHat()) {
+    Shimmers.add(new shimmer1(int(random (-30, PIXEL_WIDTH-30)), int(random(-30, PIXEL_HEIGHT-30)), color(234, 16, 82)));
+  }
+  if(beat.isSnare()) {
+    Shimmers.add(new shimmer1(int(random (-30, PIXEL_WIDTH-30)), int(random(-30, PIXEL_HEIGHT-30)), color(106, 195, 228)));
+  }
+
+  for (int i = Shimmers.size() - 1; i >= 0; i--) {
+    shimmer1 thisShimmer = (shimmer1) Shimmers.get(i);
+    thisShimmer.update();
+    if (thisShimmer.isDone()) Shimmers.remove(i); 
+  }
+}

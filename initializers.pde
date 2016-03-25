@@ -32,7 +32,7 @@ void select_randomTileableImg() {
   
     hueCycleable = false;
     
-  int randSelect = int(random(0,10));
+  int randSelect = int(random(0,11));
   
   switch(randSelect) {
     
@@ -79,6 +79,10 @@ void select_randomTileableImg() {
    hueCycleable = true;
     sourcePattern = loadImage("effect_img_10.png");
     break;    
+
+   case 10:
+    sourcePattern = loadImage("acm.png");
+    break;    
   }
   
   imgSelected = true;
@@ -92,7 +96,7 @@ void select_randomCenteredImg() {
   if (!imgSelected) {
     hueCycleable = false;
   
-  int randSelect = int(random(0,15));
+  int randSelect = int(random(0,16));
   
   switch(randSelect) {
     
@@ -160,6 +164,10 @@ void select_randomCenteredImg() {
    hueCycleable = true;
     sourcePattern = loadImage("spiral5.png");
     break;
+
+   case 15:
+    sourcePattern = loadImage("acm.png");
+    break;    
   
   }
 
@@ -167,4 +175,9 @@ void select_randomCenteredImg() {
 
   }  
 
+}
+
+void init_text() {
+    font = createFont("Munro", 10);
+    textFont(font);
 }
