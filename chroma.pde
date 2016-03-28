@@ -22,25 +22,25 @@ float[] fftSmooth = new float[32];
 int frame = 0;
 boolean useEmulator = true;
 
-int LIGHTS_WIDTH = 14;
-int LIGHTS_HEIGHT = 10;
-int MAGNITUDE = 20;
+final int LIGHTS_WIDTH = 14;
+final int LIGHTS_HEIGHT = 10;
+final int MAGNITUDE = 20;
+final int MAX_LIGHTS = LIGHTS_WIDTH * LIGHTS_HEIGHT;
 
-int PIXEL_WIDTH = LIGHTS_WIDTH * MAGNITUDE;
-int PIXEL_HEIGHT = LIGHTS_HEIGHT * MAGNITUDE;
+final int PIXEL_WIDTH = LIGHTS_WIDTH * MAGNITUDE;
+final int PIXEL_HEIGHT = LIGHTS_HEIGHT * MAGNITUDE;
 
 Serial myPort;
 
 BufferedImage resizebuffer;
 
-OscP5 control, emulator;
+OscP5 control;
 NetAddress myRemoteLocation;
 
-ArrayList Squares, Bouncers, WSquares;
+Effect e = new RotoZoomEffect();
 
 void setup() {
   if (useEmulator) {
-    emulator = new OscP5(this, 11661);
     myRemoteLocation = new NetAddress("127.0.0.1", 11661);
   } else {
     myPort = new Serial(this, "/dev/ttyACM0", 230400);
@@ -56,7 +56,7 @@ void setup() {
 
   Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
   for (Mixer.Info info : mixerInfos) {
-      System.out.println(info);
+    System.out.println(info);
     if (info.getName().substring(0, 8).equals("Loopback")) {
       minim.setInputMixer(AudioSystem.getMixer(info));
     }
@@ -80,26 +80,17 @@ void setup() {
   frameRate(20);
   smooth(0);
 
-  Drops = new ArrayList();
-  Squares = new ArrayList();  
-  Bouncers = new ArrayList();
-  WSquares = new ArrayList();
-
   resizebuffer = new BufferedImage(PIXEL_WIDTH, PIXEL_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
   sourcePattern = loadImage("acm.png");
 
-  init_rotozoom();
-  init_sparks();
-  init_stars();
-  init_text();
+  selectEffect();
 }
 
 boolean hueCycleable = false;
 float cycleHue = 0;
 
 boolean imgSelected = false;
-
 boolean directWrite = false;
 
 int selectedEffect = 0;
@@ -116,90 +107,7 @@ void draw () {
   colorMode(RGB, 255);
   noTint();
 
-  switch(selectedEffect) { 
-
-    // macetech effects
-  case 0:
-    select_randomCenteredImg();
-    effect_spinImage();
-    break;
-  case 1:
-    effect_drops();
-    break;
-  case 2:
-    effect_spectrum();
-    break;
-  case 3:
-    effect_sparks();
-    break;
-  case 4:
-    effect_waveform();
-    break;
-  case 5:
-    effect_stars();
-    break;
-
-    // contributed effects
-  case 6:
-    select_randomTileableImg();
-    effect_RotoZoom();
-    break;
-  case 7:
-    effect_square();
-    break;
-  case 8:
-    effect_bouncers();
-    break;
-  case 9:
-    effect_fire();
-    break;
-  case 10:
-    effect_suns();
-    break;
-  case 11:
-    effect_bubbles_cmooney();
-    break;
-  case 12:
-    effect_plaid();
-    break;
-  case 13:
-    effect_spectrogram();
-    break;
-  case 14:
-    effect_perlin(0.1, 0.4, 0.3, 0.4);
-    break;
-  case 15:
-    effect_quinn();
-    break;
-  case 16:
-    effect_spectrogram_max();
-    break;
-  case 17:
-    effect_Plasma();
-    break;
-  case 18:
-    select_randomTileableImg();
-    effect_Mapped_Tunnel();
-    break;
-  case 19:
-    effect_shiftingMosaic();
-    break;
-  case 20:
-    effect_text();
-    break;
-  case 21:
-    effect_colored_grid();
-    break;
-  case 22:
-    effect_gradient();
-    break;
-  case 23:
-    effect_shimmer();
-    break;
-  case 24:
-    effect_spectral_worm();
-    break;
-  }
+  e.update();
 
   if (!directWrite) {
     // capture upper half of screen
@@ -219,6 +127,9 @@ void draw () {
 
   // Put pixelized image in lower half of window
   image(effectImage, 0, height/2, width, height/2);
+  if(directWrite) {
+    image(effectImage, 0, 0, width, height/2);
+  }
 
   // Draw grid over pixels on bottom half
   drawGrid();
@@ -236,19 +147,106 @@ void drawGrid() {
   }
 }
 
+void selectEffect() {
+  switch(selectedEffect) { 
+
+    // macetech effects
+  case 0:
+    e = new SpinImageEffect();
+    break;
+  case 1:
+    e = new DropsEffect();
+    break;
+  case 2:
+    e = new SpectrumEffect();
+    break;
+  case 3:
+    e = new SparksEffect();
+    break;
+  case 4:
+    e = new WaveformEffect();
+    break;
+  case 5:
+    e = new StarsEffect();
+    break;
+
+    // contributed effects
+  case 6:
+    e = new RotoZoomEffect();
+    break;
+  case 7:
+    e = new DownTheHallEffect();
+    break;
+  case 8:
+    e = new BouncersEffect();
+    break;
+  case 9:
+    e = new FireEffect();
+    break;
+  case 10:
+    e = new SunsEffect();
+    break;
+  case 11:
+    e = new BubblesEffect();
+    break;
+  case 12:
+    e = new PlaidEffect();
+    break;
+  case 13:
+    e = new SpectrogramEffect();
+    break;
+  case 14:
+    e = new PerlinEffect();
+    break;
+  case 15:
+    e = new QuinnEffect();
+    break;
+  case 16:
+    e = new SpectrogramMaxEffect();
+    break;
+  case 17:
+    e = new PlasmaEffect();
+    break;
+  case 18:
+    e = new MappedTunnelEffect();
+    break;
+  case 19:
+    e = new ShiftingMosaicEffect();
+    break;
+  case 20:
+    e = new TextEffect();
+    break;
+  case 21:
+    e = new ColoredGridEffect();
+    break;
+  case 22:
+    e = new GradientEffect();
+    break;
+  case 23:
+    e = new ShimmerEffect();
+    break;
+  case 24:
+    e = new LifeEffect();
+    break;
+  }
+
+  e.init();
+}
+
 // up and down arrow keys to select visual effect
 void keyPressed() {
 
   if (keyCode == UP) {
     if (++selectedEffect > maxEffects) selectedEffect = 0;
+    selectEffect();
   } else if (keyCode == DOWN) {
     if (--selectedEffect < 0) selectedEffect = maxEffects;
+    selectEffect();
   }
 
   imgSelected = false;
   hueCycleable = false;
   directWrite = false;
-  rotozoom_init_done = 0;
 }
 
 // lookup table to map LED locations to chain position
@@ -265,7 +263,8 @@ int[] procToShiftLkupStatic = new int[] {
 };
 
 // create serialized byte array and send to serial port
-byte[] imgBytes = new byte[140*3+4];
+byte[] imgBytes = new byte[MAX_LIGHTS*3+4];
+color ledColor;
 
 void sendColors() {
 
@@ -273,7 +272,6 @@ void sendColors() {
   colorMode(RGB, 254);
 
   if (useEmulator) {
-
     OscMessage myMessage = new OscMessage("/setcolors");
 
     myMessage.add(8);
@@ -284,9 +282,9 @@ void sendColors() {
     myMessage.add(123);
     myMessage.add("dood");
     myMessage.add("zxc");
-    for (int j = 13; j >= 0; j--) {
-      for (int i = 0; i < 10; i++) {
-        ledColor = effectImage.pixels[j+(i*14)];
+    for (int j = LIGHTS_WIDTH - 1; j >= 0; j--) {
+      for (int i = 0; i < LIGHTS_HEIGHT; i++) {
+        ledColor = effectImage.pixels[j+(i*LIGHTS_WIDTH)];
         myMessage.add(4*red(ledColor));
         myMessage.add(4*green(ledColor));
         myMessage.add(4*blue(ledColor));
@@ -294,10 +292,10 @@ void sendColors() {
     }
 
     /* send the message */
-    emulator.send(myMessage, myRemoteLocation);
+    control.send(myMessage, myRemoteLocation);
   } else {
-    for (int j = 0; j < 14; j++) {
-      for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < LIGHTS_WIDTH; j++) {
+      for (int i = 0; i < LIGHTS_HEIGHT; i++) {
         sendIndex = procToShiftLkupStatic[i]*3+2;
         ledColor = effectImage.pixels[i];
         imgBytes[sendIndex]=((byte)red(ledColor));

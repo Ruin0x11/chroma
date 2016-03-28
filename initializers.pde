@@ -1,38 +1,10 @@
-void init_rotozoom() {
-  int src_width=sourcePattern.width;
-  int src_height=sourcePattern.height;
-  
-  rotozoom = createImage(src_width*nb_tiles, src_height*nb_tiles, RGB);
-
-  for(int i = 0; i < nb_tiles; i++) {
-    for (int j = 0; j < nb_tiles; j++) {
-      rotozoom.copy(sourcePattern,0,0,src_width,src_height,src_width*i,src_height*j, src_width, src_height);
-    }
-  }
-}
-
-void init_sparks() {
-
-  sparkMotion = new PVector(1.0,0);
-  Sparks = new ArrayList();
-
-}
-
-void init_stars() {
-
-  starMotion = new PVector(1.0,0);
-  Stars = new ArrayList();
-
-}
-
-
 void select_randomTileableImg() {
   
   if (!imgSelected) {
   
     hueCycleable = false;
     
-  int randSelect = int(random(0,11));
+  int randSelect = int(random(0,10));
   
   switch(randSelect) {
     
@@ -78,10 +50,6 @@ void select_randomTileableImg() {
    case 9:
    hueCycleable = true;
     sourcePattern = loadImage("effect_img_10.png");
-    break;    
-
-   case 10:
-    sourcePattern = loadImage("acm.png");
     break;    
   }
   
@@ -165,9 +133,9 @@ void select_randomCenteredImg() {
     sourcePattern = loadImage("spiral5.png");
     break;
 
-   case 15:
+  case 15:
     sourcePattern = loadImage("acm.png");
-    break;    
+    break;
   
   }
 
@@ -175,9 +143,4 @@ void select_randomCenteredImg() {
 
   }  
 
-}
-
-void init_text() {
-    font = createFont("Munro", 10);
-    textFont(font);
 }
