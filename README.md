@@ -3,7 +3,7 @@ chroma rework in processing.
 
 Adapted from [this](http://macetech.com/blog/node/111) earlier project. All credit for the inital code and animations goes to the original authors.
 
-# Usage
+## Usage
 To start the server:
 
 ```
@@ -25,6 +25,5 @@ oscPort.send({
 });
 ```
 
-# Contributing
-Animations go in `effects.pde`. For information on how to write animations, look [here]().
-
+## Contributing
+Animations go in `effects.pde`. For information on how to write animations, read [this](../master/doc/Creating_Effects.md).
