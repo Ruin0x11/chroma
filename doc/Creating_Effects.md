@@ -6,8 +6,6 @@ In `effects.pde`, create a new subtype of the `Effect` class:
 
 ```java
 class MyEffect extends Effect {
-  public MyEffect() {}
-
   // optional
   public void init() {
   
