@@ -52,7 +52,7 @@ void selectEffect() {
   /* ... */
   
   case 25:
-    e = new MyEffect(this);
+    e = new MyEffect();
     break;
   }
 ```
