@@ -4,6 +4,8 @@ chroma rework in processing.
 Adapted from [this](http://macetech.com/blog/node/111) earlier project. All credit for the inital code and animations goes to the original authors.
 
 ## Usage
+The kernel module `snd_aloop` has to be enabled for music integration to work.
+
 To start the server:
 
 ```
