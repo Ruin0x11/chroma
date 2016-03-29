@@ -234,6 +234,9 @@ void selectEffect() {
 
 // up and down arrow keys to select visual effect
 void keyPressed() {
+  imgSelected = false;
+  hueCycleable = false;
+  directWrite = false;
 
   if (keyCode == UP) {
     if (++selectedEffect > maxEffects) selectedEffect = 0;
@@ -242,10 +245,6 @@ void keyPressed() {
     if (--selectedEffect < 0) selectedEffect = maxEffects;
     selectEffect();
   }
-
-  imgSelected = false;
-  hueCycleable = false;
-  directWrite = false;
 }
 
 // lookup table to map LED locations to chain position
