@@ -55,4 +55,7 @@ void selectEffect() {
     e = new MyEffect();
     break;
   }
+  
+  e.init();
+}
 ```
