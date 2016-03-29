@@ -71,7 +71,6 @@ class RotoZoomEffect extends Effect {
     }
     image(rotozoom,-(imageSize/2),-(imageSize/2),imageSize+xx,imageSize+yy);
     popMatrix();
-  
   }
 }
 
@@ -1330,12 +1329,12 @@ class TextEffect extends Effect {
   int text_y = 8;
 
   public void init() {
+    directWrite = true;
     font = createFont("Munro", 10);
     textFont(font);
   }
 
   public void update() {
-    directWrite = true;
     background(0);
 
     if (text_x < 0) {
@@ -1574,13 +1573,13 @@ class ShimmerEffect extends Effect {
     rectMode(CENTER);
   
     if(beat.isKick()) {
-      Shimmers.add(new shimmer1(int(random (-50, PIXEL_WIDTH+50)), int(random(-50, PIXEL_HEIGHT+50)), color(252, 243, 185)));
+      Shimmers.add(new shimmer1(int(random(-50, PIXEL_WIDTH+50)), int(random(-50, PIXEL_HEIGHT+50)), color(252, 243, 185)));
     }
     if(beat.isHat()) {
-      Shimmers.add(new shimmer1(int(random (-50, PIXEL_WIDTH+50)), int(random(-50, PIXEL_HEIGHT+50)), color(234, 16, 82)));
+      Shimmers.add(new shimmer1(int(random(-50, PIXEL_WIDTH+50)), int(random(-50, PIXEL_HEIGHT+50)), color(234, 16, 82)));
     }
     if(beat.isSnare()) {
-      Shimmers.add(new shimmer1(int(random (-50, PIXEL_WIDTH+50)), int(random(0, PIXEL_HEIGHT)), color(106, 195, 228)));
+      Shimmers.add(new shimmer1(int(random(-50, PIXEL_WIDTH+50)), int(random(0, PIXEL_HEIGHT)), color(106, 195, 228)));
     }
 
     for (int i = Shimmers.size() - 1; i >= 0; i--) {
@@ -1601,6 +1600,7 @@ class ColoredGridEffect extends Effect {
   float smoothlevel = 0.0;
  
   public void init() {
+    directWrite = true;
     grid = new Cell[LIGHTS_WIDTH][LIGHTS_HEIGHT];
     for (int i = 0; i < LIGHTS_WIDTH; i++) {
       for (int j = 0; j < LIGHTS_HEIGHT; j++) {
@@ -1613,7 +1613,6 @@ class ColoredGridEffect extends Effect {
   public void update() {
     rectMode(CORNER);
     background(0);
-    directWrite = true;
     // The counter variables i and j are also the column and row numbers and
     // are used as arguments to the constructor for each object in the grid. 
     for (int i = 0; i < LIGHTS_WIDTH; i++) {
@@ -1665,21 +1664,74 @@ class Cell {
 // Life
 // Author: Ian Pickering
 class LifeEffect extends Effect {
-  Cell[][] life_grid;
+  boolean[][] life_grid;
+  int life_hue = 0;
 
   public void init() {
-    life_grid = new Cell[LIGHTS_WIDTH][LIGHTS_HEIGHT];
+    directWrite = true;
+    life_grid = new boolean[LIGHTS_WIDTH][LIGHTS_HEIGHT];
     for (int i = 0; i < LIGHTS_WIDTH; i++) {
       for (int j = 0; j < LIGHTS_HEIGHT; j++) {
-        // Initialize each object
-        life_grid[i][j] = new Cell(i,j,1,1,i+j);
+        life_grid[i][j] = false;
       }
     }
+
+    life_grid[1][0] = true;
+    life_grid[2][1] = true;
+    life_grid[0][2] = true;
+    life_grid[1][2] = true;
+    life_grid[2][2] = true;
+  }
+
+  int count_neighbors(int x, int y) {
+ 		int n = 0;
+		for (int y1 = y - 1; y1 <= y + 1; y1++) {
+			for (int x1 = x - 1; x1 <= x + 1; x1++) {
+				if (life_grid[(x1 + LIGHTS_WIDTH) % LIGHTS_WIDTH][(y1 + LIGHTS_HEIGHT) % LIGHTS_HEIGHT])
+					n++;
+      }
+    }
+    if(life_grid[x][y]) n--;
+    return n;
+  }
+
+  void evolve() {
+    boolean[][] next = new boolean[LIGHTS_WIDTH][LIGHTS_HEIGHT];
+    for(int i = 0; i < LIGHTS_WIDTH; i++) {
+      for(int j = 0; j < LIGHTS_HEIGHT; j++) {
+        int n = count_neighbors(i, j);
+        next[i][j] = (n == 3 || (n == 2 && life_grid[i][j]));
+      }
+    }
+    for(int i = 0; i < LIGHTS_WIDTH; i++) {
+      for(int j = 0; j < LIGHTS_HEIGHT; j++) {
+        life_grid[i][j] = next[i][j];
+      }
+    }
+  }
+
+  void display() {
+    noStroke();
+    colorMode(HSB, 100);
+    fill(life_hue, 100, 100);
+    for(int i = 0; i < LIGHTS_WIDTH; i++) {
+      for(int j = 0; j < LIGHTS_HEIGHT; j++) {
+        if(life_grid[i][j]) {
+          rect(i,j,1,1);
+        }
+      }
+    }
+    life_hue += 1;
+    life_hue %= 100;
+    colorMode(RGB, 255);
   }
  
   public void update() {
     rectMode(CORNER);
     background(0);
-    directWrite = true;
+
+    display();
+    if (frameCount % 2 == 0)
+      evolve();
   }
 }

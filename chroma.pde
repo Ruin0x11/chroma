@@ -228,8 +228,6 @@ void selectEffect() {
     e = new LifeEffect();
     break;
   }
-
-  e.init();
 }
 
 // up and down arrow keys to select visual effect
@@ -245,6 +243,8 @@ void keyPressed() {
     if (--selectedEffect < 0) selectedEffect = maxEffects;
     selectEffect();
   }
+
+  e.init();
 }
 
 // lookup table to map LED locations to chain position
