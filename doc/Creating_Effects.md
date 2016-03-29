@@ -20,7 +20,7 @@ class MyEffect extends Effect {
 ## 2. Code the effect.
 `init()` is called once when switching to the effect. Use it to initialize any needed variables.
 
-`update()` steps through a frame of the animation. Use drawing functions to draw in the region between 0 and `PIXEL_WIDTH` and 0 and `PIXEL_HEIGHT` (280 x 200) in this function. The resulting frame will be downscaled to a 10 x 14 image, and that image will be sent as the LED array.
+`update()` steps through a frame of the animation. Use drawing functions to draw in the region between 0 and `PIXEL_WIDTH` and 0 and `PIXEL_HEIGHT` (280 x 200) in this function. The resulting frame will be downscaled to a 14 x 10 image, and that image will be sent as the LED array.
 
 You can use helper classes to encapsulate the behavior of specific parts of the animation. There are many examples in `effects.pde`.
 
