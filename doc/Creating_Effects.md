@@ -38,7 +38,7 @@ You can also add tiling or centered images to be used in animations. In the `ini
 ## 3. Update the listing.
 (To be redone.)
 
-In `chroma.pde`, increment `maxEffects` by 1 and add a listing for your effect in `switchEffect()`:
+In `chroma.pde`, increment `maxEffects` by 1 and add a listing for your effect in `selectEffect()`:
 
 ```java
 int maxEffects = 25;
