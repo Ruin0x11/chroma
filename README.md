@@ -26,5 +26,5 @@ oscPort.send({
 ```
 
 ## Contributing
-Animations go in `effects.pde`. For information on how to write animations, look [here](../master/doc/Creating_Effects.md).
+Animations go in `effects.pde`. For information on how to write animations, read [this](../master/doc/Creating_Effects.md).
 
