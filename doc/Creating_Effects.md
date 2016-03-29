@@ -1,5 +1,5 @@
 # Creating Effects
-Currently, there are a variety of options that can be used to create effects. The color of each individual light can be changed directly (like the old version) or an image can be downscaled onto the light array. You can use any Processing or library function to create the image. Objects for detecting qualities of music input can also be used.
+Currently, there are a variety of options that can be used to create effects. The color of each individual light can be changed directly (like the old version) or an image can be downscaled onto the light array. You can use any Processing or library function to create the image. Objects for detecting qualities of the music input can also be used.
 
 ## 1. Add an effect.
 In `effects.pde`, create a new subtype of the `Effect` class:
