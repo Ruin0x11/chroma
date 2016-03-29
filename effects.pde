@@ -1319,7 +1319,6 @@ class WaveformEffect extends Effect {
 // Dual VU Meter
 // Draws a stereo VU meter
 
-
 // --- EFFECT ---
 // Text
 // Author: Ian Pickering
@@ -1358,7 +1357,7 @@ class TextEffect extends Effect {
     fill(255);
     text(text, text_x, text_y);
     // move the position one to the left
-    if (frame % 3 == 0) {
+    if (frameCount % 3 == 0) {
       text_x--;
     }
   }
@@ -1499,7 +1498,6 @@ class gradient1 {
   }
 
   void setGradient(int x, int y, float w, float h, color c1, color c2, int axis ) {
-
     noFill();
 
     if (axis == Y_AXIS) {  // Top to bottom gradient
@@ -1593,9 +1591,9 @@ class ShimmerEffect extends Effect {
   }
 }
 
-// EFFECT: Colored Grid
+// --- EFFECT ---
+// Colored Grid
 // Author: Emily Kind
-
 class ColoredGridEffect extends Effect {
   // 2D Array of objects
   Cell[][] grid;
@@ -1663,7 +1661,8 @@ class Cell {
   }
 }
 
-// EFFECT: Life
+// --- EFFECT ---
+// Life
 // Author: Ian Pickering
 class LifeEffect extends Effect {
   Cell[][] life_grid;

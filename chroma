@@ -16,7 +16,9 @@ function prun {
  
 function psetup {
      sketch=$1;
-     mkdir $sketch; touch $sketch/$sketch.pde; cd $sketch;
+     # mkdir $sketch
+     # touch $sketch/$sketch.pde
+     cd $sketch
 }
 
 case $1 in

@@ -1,12 +1,16 @@
 # chroma
-chroma rework in pure processing.
+chroma rework in processing.
 
 Adapted from [this](http://macetech.com/blog/node/111) earlier project. All credit for the inital code and animations goes to the original authors.
 
 # Usage
-Animations go in `effects.pde`. Music frequencies from line-in, beat detection data and a canvas region are available for use.
+To start the server:
 
-While the server is running, the current displayed animation can be controlled through OSC. Send a message to the `/switch` address on port 11662 indicating the id of the animation to swtich to.
+```
+./chroma server
+```
+
+While the server is running, the current displayed animation can be controlled through OSC. Send a message to the `/switch` address on port 11662 indicating the id of the animation to switch to.
 
 `osc.js` example:
 
@@ -20,3 +24,7 @@ oscPort.send({
     args: 1
 });
 ```
+
+# Contributing
+Animations go in `effects.pde`. For information on how to write animations, look [here]().
+

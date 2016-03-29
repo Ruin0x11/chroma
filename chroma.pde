@@ -19,7 +19,6 @@ BeatDetect beat;
 FFT fft;
 int[] fftHold = new int[32];
 float[] fftSmooth = new float[32];
-int frame = 0;
 boolean useEmulator = true;
 
 final int LIGHTS_WIDTH = 14;
@@ -275,13 +274,13 @@ void sendColors() {
     OscMessage myMessage = new OscMessage("/setcolors");
 
     myMessage.add(8);
-    myMessage.add(123);
-    myMessage.add("asd");
-    myMessage.add("dsf");
-    myMessage.add(frame++);
-    myMessage.add(123);
-    myMessage.add("dood");
-    myMessage.add("zxc");
+    myMessage.add(0);
+    myMessage.add("Chroma");
+    myMessage.add("something");
+    myMessage.add(frameCount);
+    myMessage.add(0);
+    myMessage.add("Ian Pickering");
+    myMessage.add("Chroma for ACM @ UIUC");
     for (int j = LIGHTS_WIDTH - 1; j >= 0; j--) {
       for (int i = 0; i < LIGHTS_HEIGHT; i++) {
         ledColor = effectImage.pixels[j+(i*LIGHTS_WIDTH)];

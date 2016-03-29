@@ -4,8 +4,6 @@
  * oscP5 website at http://www.sojamo.de/oscP5
  */
  
- // space is 11 x 15
-
 import oscP5.*;
 import netP5.*;
 
