@@ -1,146 +1,82 @@
+String[] tileableImages = new String[]{
+  "effect_img_1.png",
+  "effect_img_2.png",
+  "effect_img_3.png",
+  "effect_img_4.png",
+  "effect_img_5.png",
+  "effect_img_6.png",
+  "effect_img_7.png",
+  "effect_img_8.png",
+  "effect_img_9.png",
+  "effect_img_10.png",
+};
+
+String[] centeredImages = new String[]{
+  "effect_img_1.png",
+  "effect_img_2.png",
+  "effect_img_3.png",
+  "effect_img_4.png",
+  "effect_img_5.png",
+  "effect_img_6.png",
+  "effect_img_7.png",
+  "effect_img_8.png",
+  "effect_img_9.png",
+  "effect_img_10.png",
+  "spiral1.png",
+  "spiral2.png",
+  "spiral3.png",
+  "spiral4.png",
+  "spiral5.png",
+  "acm.png",
+};
+
+String[] hueCycleableImages = new String[]{
+  "effect_img_2.png",
+  "effect_img_6.png",
+  "effect_img_7.png",
+  "effect_img_10.png",
+  "spiral3.png",
+  "spiral5.png",
+};
+
 void select_randomTileableImg() {
   
   if (!imgSelected) {
   
     hueCycleable = false;
     
-  int randSelect = int(random(0,10));
+    int randSelect = int(random(0, tileableImages.length));
   
-  switch(randSelect) {
-    
-   case 0:
-    sourcePattern = loadImage("effect_img_1.png");
-    break; 
+    sourcePattern = loadImage(tileableImages[randSelect]);
+  
+    for(int i = 0; i < hueCycleableImages.length; i++) {
+      if(hueCycleableImages[i].equals(tileableImages[randSelect])) {
+        hueCycleable = true;
+      }
+    }
 
-   case 1:
-    hueCycleable = true;
-    sourcePattern = loadImage("effect_img_2.png");
-    break;    
+    imgSelected = true;
 
-   case 2:
-    sourcePattern = loadImage("effect_img_3.png");
-    break;
-
-   case 3:
-    sourcePattern = loadImage("effect_img_4.png");
-    break;
-
-   case 4:
-    sourcePattern = loadImage("effect_img_5.png");
-    break;
-
-   case 5:
-    hueCycleable = true;
-    sourcePattern = loadImage("effect_img_6.png");
-    break;
-
-   case 6:
-   hueCycleable = true;
-    sourcePattern = loadImage("effect_img_7.png");
-    break;
-
-   case 7:
-    sourcePattern = loadImage("effect_img_8.png");
-    break;
-
-   case 8:
-    sourcePattern = loadImage("effect_img_9.png");
-    break;
-
-   case 9:
-   hueCycleable = true;
-    sourcePattern = loadImage("effect_img_10.png");
-    break;    
   }
-  
-  imgSelected = true;
-  
-  }
-  
 }
 
 void select_randomCenteredImg() {
 
   if (!imgSelected) {
+
     hueCycleable = false;
   
-  int randSelect = int(random(0,16));
+    int randSelect = int(random(0,centeredImages.length));
   
-  switch(randSelect) {
-    
-   case 0:
-    sourcePattern = loadImage("effect_img_1.png");
-    break; 
-
-   case 1:
-   hueCycleable = true;
-    sourcePattern = loadImage("effect_img_2.png");
-    break;    
-
-   case 2:
-    sourcePattern = loadImage("effect_img_3.png");
-    break;
-
-   case 3:
-    sourcePattern = loadImage("effect_img_4.png");
-    break;
-
-   case 4:
-    sourcePattern = loadImage("effect_img_5.png");
-    break;
-
-   case 5:
-   hueCycleable = true;
-    sourcePattern = loadImage("effect_img_6.png");
-    break;
-
-   case 6:
-   hueCycleable = true;
-    sourcePattern = loadImage("effect_img_7.png");
-    break;
-
-   case 7:
-    sourcePattern = loadImage("effect_img_8.png");
-    break;
-
-   case 8:
-    sourcePattern = loadImage("effect_img_9.png");
-    break;
-
-   case 9:
-    sourcePattern = loadImage("effect_img_10.png");
-    break;
-
-   case 10:
-    sourcePattern = loadImage("spiral1.png");
-    break;
-
-   case 11:
-    sourcePattern = loadImage("spiral2.png");
-    break;      
-
-   case 12:
-   hueCycleable = true;
-    sourcePattern = loadImage("spiral3.png");
-    break;  
-
-   case 13:
-    sourcePattern = loadImage("spiral4.png");
-    break;  
-
-   case 14:
-   hueCycleable = true;
-    sourcePattern = loadImage("spiral5.png");
-    break;
-
-  case 15:
-    sourcePattern = loadImage("acm.png");
-    break;
+    sourcePattern = loadImage(centeredImages[randSelect]);
   
-  }
+    for(int i = 0; i < hueCycleableImages.length; i++) {
+      if(hueCycleableImages[i].equals(centeredImages[randSelect])) {
+        hueCycleable = true;
+      }
+    }
 
-  imgSelected = true;
+    imgSelected = true;
 
   }  
-
 }

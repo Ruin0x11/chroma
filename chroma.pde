@@ -21,8 +21,8 @@ int[] fftHold = new int[32];
 float[] fftSmooth = new float[32];
 boolean useEmulator = true;
 
-final int LIGHTS_WIDTH = 14;
-final int LIGHTS_HEIGHT = 10;
+final int LIGHTS_WIDTH = 8;
+final int LIGHTS_HEIGHT = 6;
 final int MAGNITUDE = 20;
 final int MAX_LIGHTS = LIGHTS_WIDTH * LIGHTS_HEIGHT;
 
@@ -30,6 +30,7 @@ final int PIXEL_WIDTH = LIGHTS_WIDTH * MAGNITUDE;
 final int PIXEL_HEIGHT = LIGHTS_HEIGHT * MAGNITUDE;
 
 Serial myPort;
+Serial portA, portB, portC;
 
 BufferedImage resizebuffer;
 
@@ -42,7 +43,10 @@ void setup() {
   if (useEmulator) {
     myRemoteLocation = new NetAddress("127.0.0.1", 11661);
   } else {
-    myPort = new Serial(this, "/dev/ttyACM0", 230400);
+    // myPort = new Serial(this, "/dev/ttyACM0", 230400);
+    portA = new Serial(this, "/dev/ttyACM0", 115200);
+    portB = new Serial(this, "/dev/ttyUSB0", 115200);
+    portC = new Serial(this, "/dev/ttyUSB1", 115200);
   }
 
   OscProperties myProperties = new OscProperties();
@@ -54,12 +58,17 @@ void setup() {
   minim = new Minim(this);
 
   Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
+  Mixer.Info selectedMixer = null;
   for (Mixer.Info info : mixerInfos) {
     System.out.println(info);
     if (info.getName().substring(0, 8).equals("Loopback")) {
-      minim.setInputMixer(AudioSystem.getMixer(info));
+      selectedMixer = info;
+      minim.setInputMixer(AudioSystem.getMixer(selectedMixer));
     }
   }
+
+  if(selectedMixer != null)
+    System.out.println("\nSelected mixer: " + selectedMixer.getName());
 
   // select audio source, comment for sample song or recording source
   in = minim.getLineIn(Minim.STEREO, 512);
@@ -75,7 +84,8 @@ void setup() {
   fft.window(FFT.HAMMING);
   fft.logAverages(120, 4); // 32 bands
 
-  size(280, 400);  
+  // size(160, 240);  
+  surface.setSize(PIXEL_WIDTH, PIXEL_HEIGHT * 2);  
   frameRate(20);
   smooth(0);
 
@@ -93,7 +103,7 @@ boolean imgSelected = false;
 boolean directWrite = false;
 
 int selectedEffect = 0;
-int maxEffects = 24;
+int maxEffects = 25;
 void draw () {
 
   if (hueCycleable) {
@@ -227,6 +237,9 @@ void selectEffect() {
   case 24:
     e = new LifeEffect();
     break;
+  case 25:
+    e = new DebugEffect();
+    break;
   }
 }
 
@@ -260,8 +273,20 @@ int[] procToShiftLkupStatic = new int[] {
   116, 112, 100, 96, 84, 80, 68, 64, 52, 48, 36, 32, 20, 16, 4, 0
 };
 
+
+int[] order = new int[] { 
+  43,  36,  41,  45,  44,  47,
+  38,  39,  42,  46,  37,  40,
+  34,  35,  33,  32,  24,   0,
+  20,  23,  21,  25,  18,  27,
+  29,  17,  28,  26,  19,  30,
+   6,  22,  16,  15,  10,  31,
+   2,   4,   3,  12,  11,  13,
+   7,   1,   5,   8,   9,  14,
+};
+
 // create serialized byte array and send to serial port
-byte[] imgBytes = new byte[MAX_LIGHTS*3+4];
+int[] imgBytes = new int[MAX_LIGHTS*3+4];
 color ledColor;
 
 void sendColors() {
@@ -294,14 +319,35 @@ void sendColors() {
   } else {
     for (int j = 0; j < LIGHTS_WIDTH; j++) {
       for (int i = 0; i < LIGHTS_HEIGHT; i++) {
-        sendIndex = procToShiftLkupStatic[i]*3+2;
-        ledColor = effectImage.pixels[i];
-        imgBytes[sendIndex]=((byte)red(ledColor));
-        imgBytes[sendIndex+1]=((byte)green(ledColor));
-        imgBytes[sendIndex+2]=((byte)blue(ledColor));
+        // sendIndex = procToShiftLkupStatic[i]*3+2;
+        int index = (i + (j*LIGHTS_HEIGHT));
+        sendIndex = order[index];
+        ledColor = effectImage.pixels[index];
+        imgBytes[sendIndex*3]=((int)red(ledColor));
+        imgBytes[sendIndex*3+1]=((int)green(ledColor));
+        imgBytes[sendIndex*3+2]=((int)blue(ledColor));
       }
     }
-    myPort.write(imgBytes);
+    // myPort.write(imgBytes);
+    int a = 0;
+    String toWrite = "";
+    for(int i = 0; i < 16; i++) {
+      toWrite += i + " " + imgBytes[a++] + " " + imgBytes[a++] + " " + imgBytes[a++] + "n";
+    }
+    toWrite += "W";
+    portA.write(toWrite);
+    toWrite = "";
+    for(int i = 16; i < 32; i++) {
+      toWrite += (i-16) + " " + imgBytes[a++] + " " + imgBytes[a++] + " " + imgBytes[a++] + "n";
+    }
+    toWrite += "W";
+    portB.write(toWrite);
+    toWrite = "";
+    for(int i = 32; i < 48; i++) {
+      toWrite += (i-32) + " " + imgBytes[a++] + " " + imgBytes[a++] + " " + imgBytes[a++] + "n";
+    }
+    toWrite += "W";
+    portC.write(toWrite);
   }
   colorMode(RGB, 255);
 }

@@ -1667,20 +1667,40 @@ class LifeEffect extends Effect {
   boolean[][] life_grid;
   int life_hue = 0;
 
+  final byte[][] gridA = {
+    {0,1,0,0,0,0,0,0,1,0,0,0,0,0},
+    {0,0,1,0,0,0,0,0,0,1,0,0,0,0},
+    {1,1,1,0,0,0,0,1,1,1,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,1,0,0,0,0,0,0,1,0,0,0,0,0},
+    {0,0,1,0,0,0,0,0,0,1,0,0,0,0},
+    {1,1,1,0,0,0,0,1,1,1,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  };
+
+  final byte[][] gridB = {
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,1,0,0,1,0,0,0,0,0,0,0,0},
+    {0,1,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,1,0,0,0,1,0,0,0,0,0,0,0,0},
+    {0,1,1,1,1,0,0,0,0,1,0,0,1,0},
+    {0,0,0,0,0,0,0,0,1,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,1,0,0,0,1,0},
+    {0,0,0,0,0,0,0,0,1,1,1,1,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  };
+
   public void init() {
     directWrite = true;
     life_grid = new boolean[LIGHTS_WIDTH][LIGHTS_HEIGHT];
     for (int i = 0; i < LIGHTS_WIDTH; i++) {
       for (int j = 0; j < LIGHTS_HEIGHT; j++) {
-        life_grid[i][j] = false;
+        life_grid[i][j] = (gridA[j][i] == 1);
       }
     }
-
-    life_grid[1][0] = true;
-    life_grid[2][1] = true;
-    life_grid[0][2] = true;
-    life_grid[1][2] = true;
-    life_grid[2][2] = true;
   }
 
   int count_neighbors(int x, int y) {
@@ -1733,5 +1753,25 @@ class LifeEffect extends Effect {
     display();
     if (frameCount % 2 == 0)
       evolve();
+  }
+}
+
+class DebugEffect extends Effect {
+  int i = 0;
+  public void update() {
+    directWrite = true;
+    rectMode(CORNER);
+    background(0);
+
+    fill(255);
+    noStroke();
+    // rect(i % LIGHTS_WIDTH, i / LIGHTS_WIDTH, 1, 1);
+    rect(0, i % LIGHTS_HEIGHT, LIGHTS_WIDTH, 1);
+
+    if(frameCount % 20 == 0) {
+      i++;
+      // i %= MAX_LIGHTS;
+      i %= LIGHTS_HEIGHT;
+    }
   }
 }
