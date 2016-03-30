@@ -10,6 +10,9 @@ abstract class Effect {
 // |        Rodolphe Pineau    RTI-Zone        |
 // |         http://www.rti-zone.org/          |
 // |   Robotics / Unix / Mac OS X / Astronomy  |
+@EffectManifest(name = "RotoZoom",
+                author = "Rodolphe Pineau",
+                description = "Rotates an image and zoom in and out")
 class RotoZoomEffect extends Effect {
   float rotAlpha = 0;
   float rot_alpha = 0;
@@ -24,6 +27,8 @@ class RotoZoomEffect extends Effect {
   float alpha_incr = 2;
   float zoom_incr = 1.5;
   float zoom_toggle = 1.0;
+
+  public RotoZoomEffect() {}
 
   public void init() {
     select_randomTileableImg();
@@ -80,12 +85,17 @@ class RotoZoomEffect extends Effect {
 // |        Rodolphe Pineau    RTI-Zone        |
 // |         http://www.rti-zone.org/          |
 // |   Robotics / Unix / Mac OS X / Astronomy  |
+@EffectManifest(name = "Plasma",
+                author = "Rodolphe Pineau",
+                description = "")
 class PlasmaEffect extends Effect {
   PImage plasma;
   int plasma_init_done = 0;
   int[] plasma_pallet = new int[256];
   float t=0;
   float pscale = 0;
+
+  public PlasmaEffect() {}
 
   public void init() {
     int R,G,B = 0;
@@ -123,6 +133,9 @@ class PlasmaEffect extends Effect {
 // |        Rodolphe Pineau    RTI-Zone        |
 // |         http://www.rti-zone.org/          |
 // |   Robotics / Unix / Mac OS X / Astronomy  |
+@EffectManifest(name = "Mapped Tunnel",
+                author = "Rodolphe Pineau",
+                description = "Rotating mapped tunnel")
 class MappedTunnelEffect extends Effect {
   PImage tunnel;
   int tunnel_init_done =0;
@@ -202,6 +215,9 @@ class MappedTunnelEffect extends Effect {
 // DownTheHall
 // Added by Dean Cheesman (deancheesman.com)
 // Generates expanding Hallway on isKick detection
+@EffectManifest(name = "DownTheHall",
+                author = "Dean Cheesman (deancheesman.com)",
+                description = "Generates expanding Hallway on isKick detection")
 class DownTheHallEffect extends Effect {
   ArrayList Squares;
   int squareHue = 0;
@@ -237,6 +253,7 @@ class DownTheHallEffect extends Effect {
 class square1 {
   
   int xpos, ypos, dropcolor, dropSize;
+  int dropWallSize = 30;
   boolean finished;
   
   square1 (int x, int y, int c) {
@@ -271,6 +288,9 @@ class square1 {
 // Bouncers
 // Added by Dean Cheesman (deancheesman.com)
 // Generates Bouncing pixels on isKick detection
+@EffectManifest(name = "Bouncers",
+                author = "Dean Cheesman (deancheesman.com)",
+                description = "Generates Bouncing pixels on isKick detection")
 class BouncersEffect extends Effect {
   ArrayList Bouncers;
 
@@ -354,6 +374,9 @@ class Bouncer {
 // Suns
 // Generates expanding Suns following bass.
 // By Marc-Andre Ferland
+@EffectManifest(name = "Suns",
+                author = "Marc-Andre Ferland",
+                description = "Generates expanding Suns following bass.")
 class SunsEffect extends Effect {
   int numBlobs = 3;
 
@@ -450,6 +473,9 @@ class SunsEffect extends Effect {
 // --- EFFECT ---
 // Fire
 // By Marc-Andre Ferland
+@EffectManifest(name = "Fire",
+                author = "Marc-Andre Ferland",
+                description = "")
 class FireEffect extends Effect {
   int[][] fire;
 
@@ -539,6 +565,9 @@ class FireEffect extends Effect {
 // bubbles_cmooney
 // Author: Charles Mooney
 // www.charlesmooney.com
+@EffectManifest(name = "bubbles_cmooney",
+                author = "Charles Mooney (www.charlesmooney.com)",
+                description = "")
 class BubblesEffect extends Effect {
   ArrayList circles = new ArrayList();
   int max_circles = 3;
@@ -607,6 +636,9 @@ class Circle {
 // Very simple Rainbow Spectrum analyzer
 // Author: Charles Mooney
 // www.charlesmooney.com
+@EffectManifest(name = "Plaid",
+                author = "Charles Mooney (www.charlesmooney.com)",
+                description = "Very simple Rainbow Spectrum analyzer")
 class PlaidEffect extends Effect {
   int num_bands_rainbow = LIGHTS_WIDTH;
   float scaling_factor = 24.0;
@@ -632,6 +664,9 @@ class PlaidEffect extends Effect {
 // Draws a spectrogram, scrolling across the screen
 // Author: Charles Mooney
 // www.charlesmooney.com
+@EffectManifest(name = "Spectrogram",
+                author = "Charles Mooney (www.charlesmooney.com)",
+                description = "Draws a spectrogram, scrolling across the screen")
 class SpectrogramEffect extends Effect {
   int[] row = new int[32];
   Spectrogram spec = new Spectrogram(14, 32);
@@ -716,6 +751,9 @@ class Spectrogram {
 // Green: Snare
 // Blue: Hats
 // By Juan Alonso
+@EffectManifest(name = "Perlin",
+                author = "Juan Alonso",
+                description = "Red: Kick  Green: Snare  Blue: Hats")
 class PerlinEffect extends Effect {
   float dampenKick = 0;
   float dampenSnare = 0;
@@ -768,6 +806,9 @@ class PerlinEffect extends Effect {
 //Created by Quinn Baetz
 //Randomly moves circles, their color corresponds to their associated frequency band.  
 //The size of the circle indicates the height of the frequency band.
+@EffectManifest(name = "Quinn",
+                author = "Quinn Baetz",
+                description = "Randomly moves circles, their color corresponds to their associated frequency band.\nThe size of the circle indicates the height of the frequency band.")
 class QuinnEffect extends Effect {
   int num_bands_quinn = 32;
 
@@ -796,6 +837,9 @@ class QuinnEffect extends Effect {
 
 // --- EFFECT ---
 //Created by Charlie Mooney, changes background color based on spectogram
+@EffectManifest(name = "Spectrogram Max",
+                author = "Charlie Mooney",
+                description = "Changes background color based on spectogram")
 class SpectrogramMaxEffect extends Effect {
   int num_bands = 32;
 
@@ -824,6 +868,9 @@ class SpectrogramMaxEffect extends Effect {
 // Generates pulsing squares on beats
 // Shifts hues within range of complementary colors
 // Created by Ivan Check from Hackerspace Nixipi
+@EffectManifest(name = "Shifting Mosaic",
+                author = "Ivan Check",
+                description = "Generates pulsing squares on beats\nShifts hues within range of complementary colors")
 class ShiftingMosaicEffect extends Effect {
   ArrayList WSquares;
   int square_limit = 100;
@@ -1027,7 +1074,9 @@ class WanderingSquare {
 // --- EFFECT ---
 // Raindrops
 // Generates expanding droplets on isKick detection
-int dropWallSize = 30;
+@EffectManifest(name = "Raindrops",
+                author = "macetech",
+                description = "Generates expanding droplets on isKick detection")
 class DropsEffect extends Effect {
   ArrayList Drops = new ArrayList();
   int dropHue = 0;
@@ -1055,6 +1104,7 @@ class DropsEffect extends Effect {
 class drop1 {
   
   int xpos, ypos, dropcolor, dropSize;
+  int dropWallSize = 30;
   boolean finished;
   
   drop1 (int x, int y, int c) {
@@ -1088,6 +1138,9 @@ class drop1 {
 // --- EFFECT ---
 // Spin image
 // Rotates an image and bounces back on isKick
+@EffectManifest(name = "Spin image",
+                author = "macetech",
+                description = "Rotates an image and bounces back on isKick")
 class SpinImageEffect extends Effect {
   int rotDegrees = 0;
   int spinImage_hue = 0;
@@ -1126,6 +1179,9 @@ class SpinImageEffect extends Effect {
 // --- EFFECT ---
 // Spectrum
 // Draws an FFT with peak hold
+@EffectManifest(name = "Spectrum",
+                author = "macetech",
+                description = "Draws an FFT with peak hold")
 class SpectrumEffect extends Effect {
 
   public void update() {
@@ -1163,6 +1219,9 @@ class SpectrumEffect extends Effect {
 // --- EFFECT ---
 // Sparkly sparks
 // Creates a field of sparks that pulse and travel
+@EffectManifest(name = "Sparkly sparks",
+                author = "macetech",
+                description = "Creates a field of sparks that pulse and travel")
 class SparksEffect extends Effect {
   ArrayList Sparks;
   PVector sparkMotion;
@@ -1200,6 +1259,9 @@ class SparksEffect extends Effect {
 // --- EFFECT ---
 // Shooting stars
 // Stars criscrossing the field
+@EffectManifest(name = "Shooting stars",
+                author = "macetech",
+                description = "Stars criscrossing the field")
 class StarsEffect extends Effect {
   ArrayList Stars;
   PVector starMotion;
@@ -1300,6 +1362,9 @@ class spark1 {
 // --- EFFECT ---
 // Waveform
 // Simple waveform effect
+@EffectManifest(name = "Waveform",
+                author = "macetech",
+                description = "Simple waveform effect")
 class WaveformEffect extends Effect {
   public void update() {
     background(0);
@@ -1318,9 +1383,9 @@ class WaveformEffect extends Effect {
 // Dual VU Meter
 // Draws a stereo VU meter
 
-// --- EFFECT ---
-// Text
-// Author: Ian Pickering
+@EffectManifest(name = "Text",
+                author = "Ian Pickering",
+                description = "Draws a scrolling text banner")
 class TextEffect extends Effect {
   String text = "ACM @ UIUC";
   PFont font;
@@ -1456,10 +1521,9 @@ void effect_mandelbrot() {
   frac_ymax *= frac_zoomdelta;
 }
 
-// --- EFFECT ---
-// Gradient
-// Author: Ian Pickering
-
+@EffectManifest(name = "Gradient",
+                author = "Ian Pickering",
+                description = "Draws an expanding gradient on isKick")
 class GradientEffect extends Effect {
   ArrayList Gradients;
 
@@ -1564,6 +1628,9 @@ class shimmer1 {
   }
 }
 
+@EffectManifest(name = "Shimmer",
+                author = "Ian Pickering",
+                description = "Slowly fading squares appear with sound")
 class ShimmerEffect extends Effect {
   ArrayList Shimmers = new ArrayList();
 
@@ -1590,9 +1657,9 @@ class ShimmerEffect extends Effect {
   }
 }
 
-// --- EFFECT ---
-// Colored Grid
-// Author: Emily Kind
+@EffectManifest(name = "Colored Grid",
+                author = "Emily Kind",
+                description = "http://www.openprocessing.org/sketch/132422")
 class ColoredGridEffect extends Effect {
   // 2D Array of objects
   Cell[][] grid;
@@ -1660,9 +1727,9 @@ class Cell {
   }
 }
 
-// --- EFFECT ---
-// Life
-// Author: Ian Pickering
+@EffectManifest(name = "Life",
+                author = "Ian Pickering",
+                description = "Game of Life simulation")
 class LifeEffect extends Effect {
   boolean[][] life_grid;
   int life_hue = 0;
@@ -1756,6 +1823,9 @@ class LifeEffect extends Effect {
   }
 }
 
+@EffectManifest(name = "Debug",
+                author = "Ian Pickering",
+                description = "Debugging pattern")
 class DebugEffect extends Effect {
   int i = 0;
   public void update() {

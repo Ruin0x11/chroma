@@ -10,6 +10,10 @@ import java.awt.*;
 import org.imgscalr.*;
 import processing.serial.*;
 import javax.sound.sampled.*;
+import org.reflections.*;
+import java.util.Set;
+import java.lang.reflect.*;
+import java.lang.annotation.*;
 
 // create global objects and variables
 Minim minim;
@@ -37,7 +41,21 @@ BufferedImage resizebuffer;
 OscP5 control;
 NetAddress myRemoteLocation;
 
-Effect e = new RotoZoomEffect();
+Reflections reflections;
+
+// hue for tinting images
+boolean hueCycleable = false;
+float cycleHue = 0;
+
+boolean imgSelected = false;
+
+boolean directWrite = false; // if true, select 14 x 10 region as light array instead of 280 x 200 region
+
+int selectedEffect = 0; // current effect
+int maxEffects = 25;    // increment this when adding an effect
+
+Effect currentEffect = new RotoZoomEffect();
+ArrayList<Class<? extends Effect>> effectList = new ArrayList();
 
 void setup() {
   if (useEmulator) {
@@ -57,10 +75,11 @@ void setup() {
   // initialize Minim object
   minim = new Minim(this);
 
+  println("Available mixers:");
   Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
   Mixer.Info selectedMixer = null;
   for (Mixer.Info info : mixerInfos) {
-    System.out.println(info);
+    println(info);
     if (info.getName().substring(0, 8).equals("Loopback")) {
       selectedMixer = info;
       minim.setInputMixer(AudioSystem.getMixer(selectedMixer));
@@ -68,7 +87,7 @@ void setup() {
   }
 
   if(selectedMixer != null)
-    System.out.println("\nSelected mixer: " + selectedMixer.getName());
+    println("\nSelected mixer: " + selectedMixer.getName());
 
   // select audio source, comment for sample song or recording source
   in = minim.getLineIn(Minim.STEREO, 512);
@@ -94,20 +113,14 @@ void setup() {
   sourcePattern = loadImage("acm.png");
 
   selectEffect();
+
+  reflections = new Reflections("");
+  effectList.addAll(reflections.getSubTypesOf(Effect.class));
+  listEffects();
 }
 
-boolean hueCycleable = false;
-float cycleHue = 0;
-
-boolean imgSelected = false;
-boolean directWrite = false;
-
-int selectedEffect = 0;
-int maxEffects = 25;
 void draw () {
-
   if (hueCycleable) {
-
     cycleHue += 0.2;
     if (cycleHue > 100) cycleHue -= 100;
   }
@@ -116,17 +129,18 @@ void draw () {
   colorMode(RGB, 255);
   noTint();
 
-  e.update();
+  // step through one frame of the current effect
+  currentEffect.update();
 
-  if (!directWrite) {
+  if (directWrite) {
+    effectImage = get(0, 0, LIGHTS_WIDTH, LIGHTS_HEIGHT);
+  } else {
     // capture upper half of screen
     effectImage = get(0, 0, PIXEL_WIDTH - 1, PIXEL_HEIGHT - 1);
 
     // use Scalr resizer which requires BufferedImage
     resizebuffer = (BufferedImage)effectImage.getImage();
     effectImage = new PImage(Scalr.resize(resizebuffer, Scalr.Mode.FIT_EXACT, LIGHTS_WIDTH, LIGHTS_HEIGHT, null));
-  } else {
-    effectImage = get(0, 0, LIGHTS_WIDTH, LIGHTS_HEIGHT);
   }
 
   effectImage.loadPixels();
@@ -136,6 +150,8 @@ void draw () {
 
   // Put pixelized image in lower half of window
   image(effectImage, 0, height/2, width, height/2);
+
+  // if using directWrite, put pixelized image on top also
   if(directWrite) {
     image(effectImage, 0, 0, width, height/2);
   }
@@ -156,91 +172,121 @@ void drawGrid() {
   }
 }
 
-void selectEffect() {
-  switch(selectedEffect) { 
-
-    // macetech effects
-  case 0:
-    e = new SpinImageEffect();
-    break;
-  case 1:
-    e = new DropsEffect();
-    break;
-  case 2:
-    e = new SpectrumEffect();
-    break;
-  case 3:
-    e = new SparksEffect();
-    break;
-  case 4:
-    e = new WaveformEffect();
-    break;
-  case 5:
-    e = new StarsEffect();
-    break;
-
-    // contributed effects
-  case 6:
-    e = new RotoZoomEffect();
-    break;
-  case 7:
-    e = new DownTheHallEffect();
-    break;
-  case 8:
-    e = new BouncersEffect();
-    break;
-  case 9:
-    e = new FireEffect();
-    break;
-  case 10:
-    e = new SunsEffect();
-    break;
-  case 11:
-    e = new BubblesEffect();
-    break;
-  case 12:
-    e = new PlaidEffect();
-    break;
-  case 13:
-    e = new SpectrogramEffect();
-    break;
-  case 14:
-    e = new PerlinEffect();
-    break;
-  case 15:
-    e = new QuinnEffect();
-    break;
-  case 16:
-    e = new SpectrogramMaxEffect();
-    break;
-  case 17:
-    e = new PlasmaEffect();
-    break;
-  case 18:
-    e = new MappedTunnelEffect();
-    break;
-  case 19:
-    e = new ShiftingMosaicEffect();
-    break;
-  case 20:
-    e = new TextEffect();
-    break;
-  case 21:
-    e = new ColoredGridEffect();
-    break;
-  case 22:
-    e = new GradientEffect();
-    break;
-  case 23:
-    e = new ShimmerEffect();
-    break;
-  case 24:
-    e = new LifeEffect();
-    break;
-  case 25:
-    e = new DebugEffect();
-    break;
+void listEffects() {
+  int i = 0;
+  for(Class<? extends Effect> effectClass : effectList) {
+    println(effectClass);
+    EffectManifest manifest = effectClass.getAnnotation(EffectManifest.class);
+    println(i);
+    println(manifest.name());
+    println(manifest.description());
+    println(manifest.author());
+    i++;
   }
+}
+
+void selectEffect() {
+  if(selectedEffect < 0)
+    selectedEffect = 0;
+  else if(selectedEffect > maxEffects)
+    selectedEffect = maxEffects;
+  
+  // switch(selectedEffect) { 
+
+  //   // macetech effects
+  // case 0:
+  //   currentEffect = new SpinImageEffect();
+  //   break;
+  // case 1:
+  //   currentEffect = new DropsEffect();
+  //   break;
+  // case 2:
+  //   currentEffect = new SpectrumEffect();
+  //   break;
+  // case 3:
+  //   currentEffect = new SparksEffect();
+  //   break;
+  // case 4:
+  //   currentEffect = new WaveformEffect();
+  //   break;
+  // case 5:
+  //   currentEffect = new StarsEffect();
+  //   break;
+
+  //   // contributed effects
+  // case 6:
+  //   currentEffect = new RotoZoomEffect();
+  //   break;
+  // case 7:
+  //   currentEffect = new DownTheHallEffect();
+  //   break;
+  // case 8:
+  //   currentEffect = new BouncersEffect();
+  //   break;
+  // case 9:
+  //   currentEffect = new FireEffect();
+  //   break;
+  // case 10:
+  //   currentEffect = new SunsEffect();
+  //   break;
+  // case 11:
+  //   currentEffect = new BubblesEffect();
+  //   break;
+  // case 12:
+  //   currentEffect = new PlaidEffect();
+  //   break;
+  // case 13:
+  //   currentEffect = new SpectrogramEffect();
+  //   break;
+  // case 14:
+  //   currentEffect = new PerlinEffect();
+  //   break;
+  // case 15:
+  //   currentEffect = new QuinnEffect();
+  //   break;
+  // case 16:
+  //   currentEffect = new SpectrogramMaxEffect();
+  //   break;
+  // case 17:
+  //   currentEffect = new PlasmaEffect();
+  //   break;
+  // case 18:
+  //   currentEffect = new MappedTunnelEffect();
+  //   break;
+  // case 19:
+  //   currentEffect = new ShiftingMosaicEffect();
+  //   break;
+
+  //   // new effects
+  // case 20:
+  //   currentEffect = new TextEffect();
+  //   break;
+  // case 21:
+  //   currentEffect = new ColoredGridEffect();
+  //   break;
+  // case 22:
+  //   currentEffect = new GradientEffect();
+  //   break;
+  // case 23:
+  //   currentEffect = new ShimmerEffect();
+  //   break;
+  // case 24:
+  //   currentEffect = new LifeEffect();
+  //   break;
+  // case 25:
+  //   currentEffect = new DebugEffect();
+  //   break;
+  // }
+
+  try {
+    Class<? extends Effect> effectClass = effectList.get(selectedEffect);
+    Constructor<? extends Effect> c = effectClass.getDeclaredConstructor(chroma.class);
+    currentEffect = c.newInstance(this);
+  } catch (Exception e) {
+    e.printStackTrace();
+  }
+
+  currentEffect.init();
 }
 
 // up and down arrow keys to select visual effect
@@ -256,8 +302,6 @@ void keyPressed() {
     if (--selectedEffect < 0) selectedEffect = maxEffects;
     selectEffect();
   }
-
-  e.init();
 }
 
 // lookup table to map LED locations to chain position
@@ -280,9 +324,9 @@ int[] order = new int[] {
   34,  35,  33,  32,  24,   0,
   20,  23,  21,  25,  18,  27,
   29,  17,  28,  26,  19,  30,
-   6,  22,  16,  15,  10,  31,
-   2,   4,   3,  12,  11,  13,
-   7,   1,   5,   8,   9,  14,
+  6,  22,  16,  15,  10,  31,
+  2,   4,   3,  12,  11,  13,
+  7,   1,   5,   8,   9,  14,
 };
 
 // create serialized byte array and send to serial port
@@ -357,6 +401,7 @@ void oscEvent(OscMessage message) {
     int id = message.get(0).intValue();
 
     selectedEffect = id;
+    selectEffect();
   } 
   catch (Exception e) {
     e.printStackTrace();
