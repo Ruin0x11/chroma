@@ -5,6 +5,9 @@ Currently, there are a variety of options that can be used to create effects. Th
 In `effects.pde`, create a new subtype of the `Effect` class:
 
 ```java
+@EffectManifest(name = "",
+                author = "",
+                description = "")
 class MyEffect extends Effect {
   // optional
   public void init() {
@@ -16,6 +19,8 @@ class MyEffect extends Effect {
   }
 }
 ```
+
+Fill in the metadata in the `@EffectManifest` annotation and the effect will be automatically added to the listing.
 
 ## 2. Code the effect.
 `init()` is called once when switching to the effect. Use it to initialize any needed variables.
@@ -34,27 +39,3 @@ List of global variables:
 
 ### 2a. Images.
 You can also add tiling or centered images to be used in animations. In the `init()` function, call either `select_randomTileableImg()` or `select_randomCenteredImg()`, then use the image that's loaded into `sourceImage`. If you want to add an image, put its filename into the appropriate places in `initializers.pde`.
-
-## 3. Update the listing.
-(To be redone.)
-
-In `chroma.pde`, increment `maxEffects` by 1 and add a listing for your effect in `selectEffect()`:
-
-```java
-int maxEffects = 25;
-
-/* ... */
-
-void selectEffect() {
-  switch(selectedEffect) { 
-
-  /* ... */
-  
-  case 25:
-    e = new MyEffect();
-    break;
-  }
-  
-  e.init();
-}
-```

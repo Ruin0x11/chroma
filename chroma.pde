@@ -52,7 +52,7 @@ boolean imgSelected = false;
 boolean directWrite = false; // if true, select 14 x 10 region as light array instead of 280 x 200 region
 
 int selectedEffect = 0; // current effect
-int maxEffects = 25;    // increment this when adding an effect
+int maxEffects;
 
 Effect currentEffect = new RotoZoomEffect();
 ArrayList<Class<? extends Effect>> effectList = new ArrayList();
@@ -112,11 +112,12 @@ void setup() {
 
   sourcePattern = loadImage("acm.png");
 
-  selectEffect();
-
   reflections = new Reflections("");
   effectList.addAll(reflections.getSubTypesOf(Effect.class));
+  maxEffects = effectList.size() - 1;
   listEffects();
+
+  selectEffect();
 }
 
 void draw () {
