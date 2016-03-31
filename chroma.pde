@@ -55,6 +55,7 @@ boolean directWrite = false; // if true, select 14 x 10 region as light array in
 boolean isEnabled = true; // if false, stop playing animations (to save LED life)
 
 int selectedEffect = 0; // current effect
+int lastEffect = 0;
 int maxEffects;
 
 Effect currentEffect = new RotoZoomEffect();
@@ -132,6 +133,10 @@ void setup() {
 
 void draw () {
   if(isEnabled) {
+    if(lastEffect != selectedEffect) {
+      selectEffect();
+    }
+
     if (hueCycleable) {
       cycleHue += 0.2;
       if (cycleHue > 100) cycleHue -= 100;
@@ -175,6 +180,8 @@ void draw () {
 
   // Draw grid over pixels on bottom half
   drawGrid();
+
+  lastEffect = selectedEffect;
 }
 
 // draw grid in lower half
@@ -209,6 +216,10 @@ JSONObject listEffects() {
 }
 
 void selectEffect() {
+  imgSelected = false;
+  hueCycleable = false;
+  directWrite = false;
+  
   if(selectedEffect < 0)
     selectedEffect = 0;
   else if(selectedEffect > maxEffects)
@@ -314,10 +325,6 @@ void selectEffect() {
 
 // up and down arrow keys to select visual effect
 void keyPressed() {
-  imgSelected = false;
-  hueCycleable = false;
-  directWrite = false;
-
   if (keyCode == UP) {
     if (++selectedEffect > maxEffects) selectedEffect = 0;
     selectEffect();
@@ -421,12 +428,10 @@ void sendColors() {
 
 void oscEvent(OscMessage message) {
   try {
-    println(message.addrPattern());
     if(message.addrPattern().equals("/switch")) {
       int id = message.get(0).intValue();
 
       selectedEffect = id;
-      selectEffect();
     }
     else if(message.addrPattern().equals("/enable")) {
       int enable = message.get(0).intValue();
