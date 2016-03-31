@@ -14,7 +14,7 @@ To start the server:
 
 Navigate to `/list` on port 8000 to retrieve a JSON array of the available animations.
 
-You can send these commands on port 11662 to control the server remotely:
+You can send these OSC commands on port 11662 to control the server remotely:
 
 - `/switch`: Takes an integer argument. Switches to the animation with the given id.
 - `/enable`: Toggles whether or not to display animations, to prolong the lifespan of the LEDs.
