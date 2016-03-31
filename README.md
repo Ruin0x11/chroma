@@ -4,7 +4,7 @@ chroma rework in processing.
 Adapted from [this](http://macetech.com/blog/node/111) earlier project. All credit for the inital code and animations goes to the original authors.
 
 ## Usage
-The kernel module `snd_aloop` has to be enabled for music integration to work.
+For local testing, the kernel module `snd_aloop` has to be enabled for music integration to work.
 
 To start the server:
 
@@ -12,20 +12,12 @@ To start the server:
 ./chroma server
 ```
 
-While the server is running, the current displayed animation can be controlled through OSC. Send a message to the `/switch` address on port 11662 indicating the id of the animation to switch to.
+Navigate to `/list` on port 8000 to retrieve a JSON array of the available animations.
 
-`osc.js` example:
+You can send these commands on port 11662 to control the server remotely:
 
-```javascript
-var oscPort = new osc.WebSocketPort({
-    url: "ws://localhost:11662" // URL to your Web Socket server.
-});
-
-oscPort.send({
-    address: "/switch",
-    args: 1
-});
-```
+- `/switch`: Takes an integer argument. Switches to the animation with the given id.
+- `/enable`: Toggles whether or not to display animations, to prolong the lifespan of the LEDs.
 
 ## Contributing
 Animations go in `effects.pde`. For information on how to write animations, read [this](../master/doc/Creating_Effects.md).
