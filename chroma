@@ -21,13 +21,5 @@ function psetup {
      cd $sketch
 }
 
-case $1 in
-    server)
-        psetup .
-        prun
-    ;;
-    emulator)
-        psetup light
-        prun
-    ;;
-esac
+psetup .
+prun

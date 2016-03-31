@@ -9,7 +9,7 @@ For local testing, the kernel module `snd_aloop` has to be enabled for music int
 To start the server:
 
 ```
-./chroma server
+./chroma
 ```
 
 Navigate to `/list` on port 8000 to retrieve a JSON array of the available animations.
@@ -17,7 +17,7 @@ Navigate to `/list` on port 8000 to retrieve a JSON array of the available anima
 You can send these OSC commands on port 11662 to control the server remotely:
 
 - `/switch`: Takes an integer argument. Switches to the animation with the given id.
-- `/enable`: Toggles whether or not to display animations, to prolong the lifespan of the LEDs.
+- `/enable`: Takes an integer argument. On 0, disable displaying animations, to prolong the lifespan of the LEDs. Otherwise, enable animations.
 
 ## Contributing
 Animations go in `effects.pde`. For information on how to write animations, read [this](../master/doc/Creating_Effects.md).
