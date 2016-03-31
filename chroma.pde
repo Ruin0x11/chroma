@@ -55,7 +55,7 @@ boolean directWrite = false; // if true, select 14 x 10 region as light array in
 boolean isEnabled = true; // if false, stop playing animations (to save LED life)
 
 int selectedEffect = 0; // current effect
-int lastEffect = 0;
+boolean changeEffect = false; // true when remote message to change effect is recieved
 int maxEffects;
 
 Effect currentEffect = new RotoZoomEffect();
@@ -133,7 +133,7 @@ void setup() {
 
 void draw () {
   if(isEnabled) {
-    if(lastEffect != selectedEffect) {
+    if(changeEffect) {
       selectEffect();
     }
 
@@ -180,8 +180,6 @@ void draw () {
 
   // Draw grid over pixels on bottom half
   drawGrid();
-
-  lastEffect = selectedEffect;
 }
 
 // draw grid in lower half
@@ -321,6 +319,7 @@ void selectEffect() {
   }
 
   currentEffect.init();
+  changeEffect = false;
 }
 
 // up and down arrow keys to select visual effect
@@ -432,6 +431,7 @@ void oscEvent(OscMessage message) {
       int id = message.get(0).intValue();
 
       selectedEffect = id;
+      changeEffect = true;
     }
     else if(message.addrPattern().equals("/enable")) {
       int enable = message.get(0).intValue();
