@@ -28,8 +28,6 @@ class RotoZoomEffect extends Effect {
   float zoom_incr = 1.5;
   float zoom_toggle = 1.0;
 
-  public RotoZoomEffect() {}
-
   public void init() {
     select_randomTileableImg();
     int src_width=sourcePattern.width;
@@ -94,8 +92,6 @@ class PlasmaEffect extends Effect {
   int[] plasma_pallet = new int[256];
   float t=0;
   float pscale = 0;
-
-  public PlasmaEffect() {}
 
   public void init() {
     int R,G,B = 0;
@@ -1087,7 +1083,7 @@ class DropsEffect extends Effect {
     background(0);
 
     if ( beat.isKick() ) {
-      Drops.add(new drop1(int(random(19,299)),int(random(19,139)),dropHue));
+      Drops.add(new drop1(int(random(19,PIXEL_WIDTH - 20 - 1)),int(random(19,PIXEL_HEIGHT - 20 - 1)),dropHue));
       dropHue += 4;
       if (dropHue > 100) dropHue -= 100;
     }
@@ -1239,7 +1235,7 @@ class SparksEffect extends Effect {
     background(0);
 
     if ( beat.isKick() ) {
-      Sparks.add(new spark1(-30,int(random(0,7))*20+10,sparkHue,30, 1.0, 0.0));
+      Sparks.add(new spark1(-30,int(random(0,LIGHTS_HEIGHT - 1))*MAGNITUDE+10,sparkHue,30, 1.0, 0.0));
       sparkHue += 1;
       if (sparkHue > 100) sparkHue -= 100;
     }

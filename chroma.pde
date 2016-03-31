@@ -14,6 +14,7 @@ import org.reflections.*;
 import java.util.Set;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
+import http.*;
 
 // create global objects and variables
 Minim minim;
@@ -51,11 +52,15 @@ boolean imgSelected = false;
 
 boolean directWrite = false; // if true, select 14 x 10 region as light array instead of 280 x 200 region
 
+boolean isEnabled = true; // if false, stop playing animations (to save LED life)
+
 int selectedEffect = 0; // current effect
 int maxEffects;
 
 Effect currentEffect = new RotoZoomEffect();
 ArrayList<Class<? extends Effect>> effectList = new ArrayList();
+
+SimpleHTTPServer webServer;
 
 void setup() {
   if (useEmulator) {
@@ -71,6 +76,11 @@ void setup() {
   myProperties.setDatagramSize(10000); 
   myProperties.setListeningPort(11662);
   control = new OscP5(this, myProperties);
+
+  SimpleHTTPServer.useIndexHtml = false;
+  webServer = new SimpleHTTPServer(this);
+  DynamicResponseHandler responder = new DynamicResponseHandler(new TextResponse(0), "application/json");
+  webServer.createContext("list", responder);
 
   // initialize Minim object
   minim = new Minim(this);
@@ -115,46 +125,52 @@ void setup() {
   reflections = new Reflections("");
   effectList.addAll(reflections.getSubTypesOf(Effect.class));
   maxEffects = effectList.size() - 1;
-  listEffects();
 
   selectEffect();
+
 }
 
 void draw () {
-  if (hueCycleable) {
-    cycleHue += 0.2;
-    if (cycleHue > 100) cycleHue -= 100;
-  }
+  if(isEnabled) {
+    if (hueCycleable) {
+      cycleHue += 0.2;
+      if (cycleHue > 100) cycleHue -= 100;
+    }
 
-  // sample effects are drawn in upper PIXEL_WIDTHxPIXEL_HEIGHT half of screen
-  colorMode(RGB, 255);
-  noTint();
+    // sample effects are drawn in upper PIXEL_WIDTHxPIXEL_HEIGHT half of screen
+    colorMode(RGB, 255);
+    noTint();
 
-  // step through one frame of the current effect
-  currentEffect.update();
+    // step through one frame of the current effect
+    currentEffect.update();
 
-  if (directWrite) {
-    effectImage = get(0, 0, LIGHTS_WIDTH, LIGHTS_HEIGHT);
-  } else {
-    // capture upper half of screen
-    effectImage = get(0, 0, PIXEL_WIDTH - 1, PIXEL_HEIGHT - 1);
+    if (directWrite) {
+      effectImage = get(0, 0, LIGHTS_WIDTH, LIGHTS_HEIGHT);
+    } else {
+      // capture upper half of screen
+      effectImage = get(0, 0, PIXEL_WIDTH - 1, PIXEL_HEIGHT - 1);
 
-    // use Scalr resizer which requires BufferedImage
-    resizebuffer = (BufferedImage)effectImage.getImage();
-    effectImage = new PImage(Scalr.resize(resizebuffer, Scalr.Mode.FIT_EXACT, LIGHTS_WIDTH, LIGHTS_HEIGHT, null));
-  }
+      // use Scalr resizer which requires BufferedImage
+      resizebuffer = (BufferedImage)effectImage.getImage();
+      effectImage = new PImage(Scalr.resize(resizebuffer, Scalr.Mode.FIT_EXACT, LIGHTS_WIDTH, LIGHTS_HEIGHT, null));
+    }
 
-  effectImage.loadPixels();
+    effectImage.loadPixels();
 
-  // output pixelized image to LED array
-  sendColors();
+    // output pixelized image to LED array
+    sendColors();
 
-  // Put pixelized image in lower half of window
-  image(effectImage, 0, height/2, width, height/2);
+    // Put pixelized image in lower half of window
+    image(effectImage, 0, height/2, width, height/2);
 
-  // if using directWrite, put pixelized image on top also
-  if(directWrite) {
-    image(effectImage, 0, 0, width, height/2);
+    // if using directWrite, put pixelized image on top also
+    if(directWrite) {
+      image(effectImage, 0, 0, width, height/2);
+    }
+
+  }  
+  else {
+    background(0);
   }
 
   // Draw grid over pixels on bottom half
@@ -173,17 +189,23 @@ void drawGrid() {
   }
 }
 
-void listEffects() {
+JSONObject listEffects() {
+  JSONArray ja = new JSONArray();
+
   int i = 0;
   for(Class<? extends Effect> effectClass : effectList) {
-    println(effectClass);
     EffectManifest manifest = effectClass.getAnnotation(EffectManifest.class);
-    println(i);
-    println(manifest.name());
-    println(manifest.description());
-    println(manifest.author());
+    JSONObject jo = new JSONObject();
+    jo.setInt("id", i);
+    jo.setString("name", manifest.name());
+    jo.setString("description", manifest.description());
+    jo.setString("author", manifest.author());
+    ja.append(jo);
     i++;
   }
+  JSONObject mainObj = new JSONObject();
+  mainObj.setJSONArray("effects", ja);
+  return mainObj;
 }
 
 void selectEffect() {
@@ -399,13 +421,35 @@ void sendColors() {
 
 void oscEvent(OscMessage message) {
   try {
-    int id = message.get(0).intValue();
+    println(message.addrPattern());
+    if(message.addrPattern().equals("/switch")) {
+      int id = message.get(0).intValue();
 
-    selectedEffect = id;
-    selectEffect();
+      selectedEffect = id;
+      selectEffect();
+    }
+    else if(message.addrPattern().equals("/enable")) {
+      int enable = message.get(0).intValue();
+
+      isEnabled = (enable != 0);
+    }
   } 
   catch (Exception e) {
     e.printStackTrace();
+  }
+}
+
+class TextResponse extends ResponseBuilder {
+  int type;
+
+  TextResponse(int type) {
+    this.type = type;
+  }
+
+  public String getResponse(String requestBody) {
+    String output = "";
+    output = listEffects().toString();
+    return output;  //note that javascript may require: return "callback(" + json.toString() + ")"
   }
 }
 
