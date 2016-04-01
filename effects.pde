@@ -1841,3 +1841,216 @@ class DebugEffect extends Effect {
     }
   }
 }
+
+@EffectManifest(name = "Petri",
+                author = "Dan Bornstein (danfuzz@milk.com)",
+                description = "Simulates mold in a petri dish. Port from xscreensaver.")
+class PetriEffect extends Effect {
+
+  int arr_width;
+  int arr_height;
+  int count = 8;
+
+  PetriCell[][] cells;
+
+  int blastcount;
+
+  float orthlim;
+  float diaglim = 1.414;
+  float anychan = 0.0014;
+  float minorchan = 0.5;
+  float instantdeathchan = 0.2;
+  int minlifespan = 500;
+  int maxlifespan = 1500;
+  float minlifespeed = 0.24;
+  float maxlifespeed = 0.33;
+  float mindeathspeed = 0.42;
+  float maxdeathspeed = 0.46;
+  boolean originalcolors = false;
+
+  int pixSize = MAGNITUDE/2;
+
+  int warned;
+  int delay = 10000;
+
+  final Point[] all_coords = {new Point(-1, -1),
+                                     new Point(-1, 1),
+                                     new Point(1, -1),
+                                     new Point(1, 1),
+                                     new Point(-1,  0),
+                                     new Point(1, 0),
+                                     new Point(0, -1),
+                                     new Point(0, 1)};
+
+  public void init() {
+    background(0);
+    rectMode(CORNER);
+    arr_width = PIXEL_WIDTH/pixSize;
+    arr_height = PIXEL_HEIGHT/pixSize;
+
+    cells = new PetriCell[arr_width][arr_height];
+    for(int i = 0; i < arr_width; i++) {
+      for(int j = 0; j < arr_height; j++) {
+        cells[i][j] = new PetriCell();
+      }
+    }
+
+    orthlim = 1;
+    blastcount = random_life_value();
+    
+    randblip(true);
+  }
+
+  public void update() {
+    noStroke();
+    colorMode(HSB, 100);
+    for(int i = 0; i < arr_width; i++) {
+      for(int j = 0; j < arr_height; j++) {
+        PetriCell cell = cells[i][j];
+        Point coords;
+
+        int start;
+
+        if(cell.speed == 0) continue;
+        cell.growth += cell.speed;
+
+        if(cell.growth >= diaglim)
+        {
+          start = 0;
+        }
+        else if(cell.growth >= orthlim)
+        {
+          start = 4;
+        }
+        else
+        {
+          continue;
+        }
+
+        for(int k = start; k < all_coords.length; k++) {
+          coords = all_coords[k];
+          int x = i + coords.x;
+          int y = j + coords.y;
+
+          if(x < 0) x = arr_width - 1;
+          else if(x >= arr_width) x = 0;
+
+          if(y < 0) y = arr_height - 1;
+          else if(y >= arr_height) y = 0;
+
+          newcell(x, y, cell.col, cell.speed);
+        }
+
+        if(cell.growth >= diaglim)
+          killcell(i, j);
+      }
+    }
+
+    for(int i = 0; i < arr_width; i++) {
+      for(int j = 0; j < arr_height; j++) {
+        PetriCell cell = cells[i][j];
+        if(cell.isnext)
+        {
+          cell.isnext = false;
+          cell.speed = cell.nextspeed;
+          cell.growth = 0;
+          cell.col = cell.nextcol;
+          fill((100 / count) * cell.col, 100, 100);
+          rect(i*pixSize, j*pixSize, pixSize, pixSize);
+        }
+      }
+    }
+    randblip(false);
+  }
+
+  void newcell(int x, int y, int col, float sp) {
+    PetriCell cell = cells[x][y];
+    if(cell.col == col) return;
+
+    cell.nextcol = col;
+    cell.nextspeed = sp;
+    cell.isnext = true;
+  }
+
+  void killcell(int x, int y)
+  {
+    PetriCell cell = cells[x][y];
+    cell.speed = 0;
+    fill((100 / count) * cell.col, 100, 75);
+    rect(x*pixSize, y*pixSize, pixSize, pixSize);
+  }
+
+  void randblip(boolean doit) {
+    int n;
+    int b = 0;
+    println(blastcount + " " + doit);
+    if(!doit && blastcount-- >= 0 && random(1) > anychan)
+    {
+      return;
+    }
+
+    if(blastcount < 0)
+    {
+      b = 1;
+      n = 2;
+      blastcount = random_life_value();
+      if(random(1) < instantdeathchan)
+      {
+        init();
+        b = 0;
+      }
+    }
+    else if(random(1) <= minorchan)
+    {
+      n = 2;
+    }
+    else
+    {
+      n = int(random(2, 5));
+    }
+
+    while(n-- > 0)
+    {
+      int x = int(random(arr_width));
+      int y = int(random(arr_height));
+      int c;
+      float s;
+      if(b > 0)
+      {
+        c = 0;
+	      s = random(mindeathspeed, maxdeathspeed);
+      }
+      else
+      {
+        if(count - 1 > 0)
+          c = int(random (count-1));
+        else
+          c = 0;
+        c += 1;
+        s = random(minlifespeed, maxlifespeed);
+      }
+      newcell(x, y, c, s);
+    }
+  }
+
+  int random_life_value() {
+    return int(random(minlifespan, maxlifespan));
+  }
+}
+
+class PetriCell {
+  int col;
+  boolean isnext;
+  int nextcol;
+  
+  float speed;
+  float growth;
+  float nextspeed;
+
+  public PetriCell() {
+    this.speed = 0;
+    this.growth = 0;
+    this.col = 0;
+    this.isnext = false;
+  }
+}
