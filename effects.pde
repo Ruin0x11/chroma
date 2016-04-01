@@ -1846,7 +1846,6 @@ class DebugEffect extends Effect {
                 author = "Dan Bornstein (danfuzz@milk.com)",
                 description = "Simulates mold in a petri dish. Port from xscreensaver.")
 class PetriEffect extends Effect {
-
   int arr_width;
   int arr_height;
   int count = 8;
@@ -1860,12 +1859,12 @@ class PetriEffect extends Effect {
   float anychan = 0.0014;
   float minorchan = 0.5;
   float instantdeathchan = 0.2;
-  int minlifespan = 500;
-  int maxlifespan = 1500;
+  int minlifespan = 300;
+  int maxlifespan = 900;
   float minlifespeed = 0.24;
   float maxlifespeed = 0.33;
-  float mindeathspeed = 0.42;
-  float maxdeathspeed = 0.46;
+  float mindeathspeed = 0.72;
+  float maxdeathspeed = 0.86;
   boolean originalcolors = false;
 
   int pixSize = MAGNITUDE/2;
@@ -1946,6 +1945,8 @@ class PetriEffect extends Effect {
       }
     }
 
+    boolean none = true;
+
     for(int i = 0; i < arr_width; i++) {
       for(int j = 0; j < arr_height; j++) {
         PetriCell cell = cells[i][j];
@@ -1955,12 +1956,17 @@ class PetriEffect extends Effect {
           cell.speed = cell.nextspeed;
           cell.growth = 0;
           cell.col = cell.nextcol;
-          fill((100 / count) * cell.col, 100, 100);
+          if(cell.col == -1)
+            fill(0);
+          else
+            fill((100 / count) * cell.col, 100, 100);
           rect(i*pixSize, j*pixSize, pixSize, pixSize);
         }
+        if(cell.speed > 0)
+          none = false;
       }
     }
-    randblip(false);
+    randblip(none);
   }
 
   void newcell(int x, int y, int col, float sp) {
@@ -1976,14 +1982,16 @@ class PetriEffect extends Effect {
   {
     PetriCell cell = cells[x][y];
     cell.speed = 0;
-    fill((100 / count) * cell.col, 100, 75);
+    if(cell.col == -1)
+      fill(0);
+    else
+        fill((100 / count) * cell.col, 100, 75);
     rect(x*pixSize, y*pixSize, pixSize, pixSize);
   }
 
   void randblip(boolean doit) {
     int n;
     int b = 0;
-    println(blastcount + " " + doit);
     if(!doit && blastcount-- >= 0 && random(1) > anychan)
     {
       return;
@@ -2017,7 +2025,7 @@ class PetriEffect extends Effect {
       float s;
       if(b > 0)
       {
-        c = 0;
+        c = -1;
 	      s = random(mindeathspeed, maxdeathspeed);
       }
       else
