@@ -2062,3 +2062,115 @@ class PetriCell {
     this.isnext = false;
   }
 }
+
+@EffectManifest(name = "Pong",
+                author = "Ian Pickering",
+                description = "")
+class PongEffect extends Effect {
+  int paddleWidth = MAGNITUDE;
+  int paddleHeight = MAGNITUDE * 2;
+  int paddleOffset = MAGNITUDE;
+  int paddleSpeed = 10;
+
+  int ballSpeed = 8;
+  int ballRadius = 20;
+
+  int player1_y = 0;
+  int player2_y = 0;
+  int player1_x = paddleOffset;
+  int player2_x = PIXEL_WIDTH - paddleOffset - paddleWidth;
+
+  int player1_score = 0;
+  int player2_score = 0;
+
+  int ball_x, ball_y;
+  int ball_dx, ball_dy;
+
+  boolean start = false;
+  
+  // optional
+  public void init() {
+    rectMode(CORNER);
+    ellipseMode(RADIUS);
+
+    player1_y = PIXEL_HEIGHT / 2 - (paddleHeight / 2);
+    player2_y = PIXEL_HEIGHT / 2 - (paddleHeight / 2);
+
+    placeball();
+  }
+  
+  public void update() {
+    background(0);
+
+    fill(255);
+    rect(player1_x, player1_y, paddleWidth, paddleHeight);
+    rect(player2_x, player2_y, paddleWidth, paddleHeight);
+
+    ellipse(ball_x, ball_y, ballRadius, ballRadius);
+
+    if(keys[0]) {
+      player1_y -= paddleSpeed;
+      start = true;
+    }
+    if(keys[1]) {
+      player1_y += paddleSpeed;
+      start = true;
+    }
+    if(keys[2]) {
+      player2_y -= paddleSpeed;
+      start = true;
+    }
+    if(keys[3]) {
+      player2_y += paddleSpeed;
+      start = true;
+    }
+
+    if(player1_y < 0)
+      player1_y = 0;
+    if(player2_y < 0)
+      player2_y = 0;
+    if(player1_y > PIXEL_HEIGHT - paddleHeight)
+      player1_y = PIXEL_HEIGHT - paddleHeight;
+    if(player2_y > PIXEL_HEIGHT - paddleHeight)
+      player2_y = PIXEL_HEIGHT - paddleHeight;
+
+    if(start) {
+        ball_x += ball_dx;
+        ball_y += ball_dy;
+    }
+
+    /* dumb collision detection */
+    if ((ball_x >= player1_x && ball_x <= player1_x + paddleWidth) && (ball_y >= player1_y && ball_y <= player1_y + paddleHeight)) {
+      ball_x = player1_x + paddleWidth;
+      ball_dx = -ball_dx;
+      } else if ((ball_x >= player2_x && ball_x <= player2_x + paddleWidth) && (ball_y >= player2_y && ball_y <= player2_y + paddleHeight)) {
+      ball_x = player2_x - paddleWidth;
+      ball_dx = -ball_dx;
+
+    } else {  
+      if(ball_x < ballRadius) {
+        player2_score++;
+        placeball();
+      } 
+      else if(ball_x > PIXEL_WIDTH - ballRadius) {
+        player1_score++;
+        placeball();
+      }
+      if(ball_y < ballRadius || ball_y > PIXEL_HEIGHT - ballRadius)
+        ball_dy = -ball_dy;
+    }
+  }
+
+  public void placeball() {
+    ball_x = PIXEL_WIDTH / 2;
+    ball_y = PIXEL_HEIGHT / 2;
+    ball_dx = (2*ballSpeed) / 3;
+    ball_dy = ballSpeed;
+    if(int(random(1)) == 0)
+      ball_dx = -ball_dx;
+    if(int(random(1)) == 0)
+      ball_dy = -ball_dy;
+
+    start = false;
+  }
+}

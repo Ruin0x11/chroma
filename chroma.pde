@@ -11,7 +11,7 @@ import org.imgscalr.*;
 import processing.serial.*;
 import javax.sound.sampled.*;
 import org.reflections.*;
-import java.util.Set;
+import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import http.*;
@@ -24,10 +24,12 @@ BeatDetect beat;
 FFT fft;
 int[] fftHold = new int[32];
 float[] fftSmooth = new float[32];
+boolean keys[] = new boolean[4];
+
 boolean useEmulator = true;
 
-final int LIGHTS_WIDTH = 8;
-final int LIGHTS_HEIGHT = 6;
+final int LIGHTS_WIDTH = 14;
+final int LIGHTS_HEIGHT = 10;
 final int MAGNITUDE = 20;
 final int MAX_LIGHTS = LIGHTS_WIDTH * LIGHTS_HEIGHT;
 
@@ -73,11 +75,13 @@ void setup() {
     portC = new Serial(this, "/dev/ttyUSB1", 115200);
   }
 
+  // start an OSC server on port 11662, and increase allowed message size
   OscProperties myProperties = new OscProperties();
   myProperties.setDatagramSize(10000); 
   myProperties.setListeningPort(11662);
   control = new OscP5(this, myProperties);
 
+  // start an HTTP server to provide the list of effects
   SimpleHTTPServer.useIndexHtml = false;
   webServer = new SimpleHTTPServer(this);
   DynamicResponseHandler responder = new DynamicResponseHandler(new TextResponse(0), "application/json");
@@ -86,6 +90,7 @@ void setup() {
   // initialize Minim object
   minim = new Minim(this);
 
+  // print a list of mixers and select alsa loopback if available (for testing)
   println("Available mixers:");
   Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
   Mixer.Info selectedMixer = null;
@@ -102,10 +107,7 @@ void setup() {
 
   // select audio source, comment for sample song or recording source
   in = minim.getLineIn(Minim.STEREO, 512);
-  //in = minim.loadFile("Gosprom_-_12_-_San_Francisco.mp3",512); // Creative Commons
-  //in.play();
 
-  //beat = new BeatDetect(song.bufferSize(), song.sampleRate());
   beat = new BeatDetect(in.bufferSize(), in.sampleRate());  
   beat.setSensitivity(300);
   beat.detectMode(BeatDetect.FREQ_ENERGY);
@@ -114,26 +116,36 @@ void setup() {
   fft.window(FFT.HAMMING);
   fft.logAverages(120, 4); // 32 bands
 
-  // size(160, 240);  
+  // set canvas size
   surface.setSize(PIXEL_WIDTH, PIXEL_HEIGHT * 2);  
   frameRate(20);
   smooth(0);
 
   resizebuffer = new BufferedImage(PIXEL_WIDTH, PIXEL_HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-  sourcePattern = loadImage("acm.png");
-
+  // build list of available effects
   reflections = new Reflections("");
   effectList.addAll(reflections.getSubTypesOf(Effect.class));
   maxEffects = effectList.size() - 1;
 
-  selectEffect();
+  // sort the effect list by effect name
+  Collections.sort(effectList, new Comparator<Class>() 
+  {
+     public int compare(Class o1, Class o2) 
+     {
+       EffectManifest manifestA = (EffectManifest)o1.getAnnotation(EffectManifest.class);
+       EffectManifest manifestB = (EffectManifest)o2.getAnnotation(EffectManifest.class);
+       return manifestA.name().compareTo(manifestB.name());
+     }
+  });
 
+  selectEffect();
 }
 
 void draw () {
   if(isEnabled) {
     if(changeEffect) {
+      // request to change effect received since last draw, so change to it
       selectEffect();
     }
 
@@ -150,6 +162,7 @@ void draw () {
     currentEffect.update();
 
     if (directWrite) {
+      // capture 10 x 14 region in upper-left corner
       effectImage = get(0, 0, LIGHTS_WIDTH, LIGHTS_HEIGHT);
     } else {
       // capture upper half of screen
@@ -160,6 +173,7 @@ void draw () {
       effectImage = new PImage(Scalr.resize(resizebuffer, Scalr.Mode.FIT_EXACT, LIGHTS_WIDTH, LIGHTS_HEIGHT, null));
     }
 
+    // make the image's pixel array available
     effectImage.loadPixels();
 
     // output pixelized image to LED array
@@ -199,6 +213,7 @@ JSONObject listEffects() {
 
   int i = 0;
   for(Class<? extends Effect> effectClass : effectList) {
+    // read the effect's manifest annotation and add the fields to the JSON array
     EffectManifest manifest = effectClass.getAnnotation(EffectManifest.class);
     JSONObject jo = new JSONObject();
     jo.setInt("id", i);
@@ -214,111 +229,37 @@ JSONObject listEffects() {
 }
 
 void selectEffect() {
+  // reset any effect-specific variables
   imgSelected = false;
   hueCycleable = false;
   directWrite = false;
   
+  // clamp the index
   if(selectedEffect < 0)
     selectedEffect = 0;
   else if(selectedEffect > maxEffects)
     selectedEffect = maxEffects;
-  
-  // switch(selectedEffect) { 
-
-  //   // macetech effects
-  // case 0:
-  //   currentEffect = new SpinImageEffect();
-  //   break;
-  // case 1:
-  //   currentEffect = new DropsEffect();
-  //   break;
-  // case 2:
-  //   currentEffect = new SpectrumEffect();
-  //   break;
-  // case 3:
-  //   currentEffect = new SparksEffect();
-  //   break;
-  // case 4:
-  //   currentEffect = new WaveformEffect();
-  //   break;
-  // case 5:
-  //   currentEffect = new StarsEffect();
-  //   break;
-
-  //   // contributed effects
-  // case 6:
-  //   currentEffect = new RotoZoomEffect();
-  //   break;
-  // case 7:
-  //   currentEffect = new DownTheHallEffect();
-  //   break;
-  // case 8:
-  //   currentEffect = new BouncersEffect();
-  //   break;
-  // case 9:
-  //   currentEffect = new FireEffect();
-  //   break;
-  // case 10:
-  //   currentEffect = new SunsEffect();
-  //   break;
-  // case 11:
-  //   currentEffect = new BubblesEffect();
-  //   break;
-  // case 12:
-  //   currentEffect = new PlaidEffect();
-  //   break;
-  // case 13:
-  //   currentEffect = new SpectrogramEffect();
-  //   break;
-  // case 14:
-  //   currentEffect = new PerlinEffect();
-  //   break;
-  // case 15:
-  //   currentEffect = new QuinnEffect();
-  //   break;
-  // case 16:
-  //   currentEffect = new SpectrogramMaxEffect();
-  //   break;
-  // case 17:
-  //   currentEffect = new PlasmaEffect();
-  //   break;
-  // case 18:
-  //   currentEffect = new MappedTunnelEffect();
-  //   break;
-  // case 19:
-  //   currentEffect = new ShiftingMosaicEffect();
-  //   break;
-
-  //   // new effects
-  // case 20:
-  //   currentEffect = new TextEffect();
-  //   break;
-  // case 21:
-  //   currentEffect = new ColoredGridEffect();
-  //   break;
-  // case 22:
-  //   currentEffect = new GradientEffect();
-  //   break;
-  // case 23:
-  //   currentEffect = new ShimmerEffect();
-  //   break;
-  // case 24:
-  //   currentEffect = new LifeEffect();
-  //   break;
-  // case 25:
-  //   currentEffect = new DebugEffect();
-  //   break;
-  // }
 
   try {
+    // get the effect in the provided index of the list
     Class<? extends Effect> effectClass = effectList.get(selectedEffect);
+
+    // get the manifest of the effect class
+    EffectManifest manifest = effectClass.getAnnotation(EffectManifest.class);
+
+    println("Switched to effect: " + manifest.name());
+
+    // get the effect's zero argument constructor
     Constructor<? extends Effect> c = effectClass.getDeclaredConstructor(chroma.class);
+
+    // create the effect
     currentEffect = c.newInstance(this);
   } catch (Exception e) {
     e.printStackTrace();
   }
 
   currentEffect.init();
+
   changeEffect = false;
 }
 
@@ -331,7 +272,21 @@ void keyPressed() {
     if (--selectedEffect < 0) selectedEffect = maxEffects;
     selectEffect();
   }
+
+  // awful hack for lack of multi-key support, in the meantime
+  if (key == 'w')  keys[0] = true;
+  if (key == 's')  keys[1] = true;
+  if (key == 'i')  keys[2] = true;
+  if (key == 'k')  keys[3] = true;
 }
+ 
+void keyReleased() {
+  if (key == 'w')  keys[0] = false;
+  if (key == 's')  keys[1] = false;
+  if (key == 'i')  keys[2] = false;
+  if (key == 'k')  keys[3] = false;
+}
+
 
 // lookup table to map LED locations to chain position
 // static procToShift lookup (0-based)
