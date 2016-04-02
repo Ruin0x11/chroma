@@ -2090,9 +2090,6 @@ class PongEffect extends Effect {
   
   // optional
   public void init() {
-    rectMode(CORNER);
-    ellipseMode(RADIUS);
-
     player1_y = PIXEL_HEIGHT / 2 - (paddleHeight / 2);
     player2_y = PIXEL_HEIGHT / 2 - (paddleHeight / 2);
 
@@ -2100,6 +2097,8 @@ class PongEffect extends Effect {
   }
   
   public void update() {
+    rectMode(CORNER);
+    ellipseMode(RADIUS);
     background(0);
 
     fill(255);
@@ -2174,3 +2173,29 @@ class PongEffect extends Effect {
     start = false;
   }
 }
+
+// Point[][][] shapes = [[[[0  0] [1  0] [0  1] [1  1]]]
+
+//    [[[0  0] [1  0] [2  0] [2  1]]
+//     [[1 -1] [1  0] [1  1] [0  1]]
+//     [[0 -1] [0  0] [1  0] [2  0]]
+//     [[1 -1] [2 -1] [1  0] [1  1]]]
+
+//    [[[0  0] [1  0] [2  0] [0  1]]
+//     [[0 -1] [1 -1] [1  0] [1  1]]
+//     [[2 -1] [0  0] [1  0] [2  0]]
+//     [[1 -1] [1  0] [1  1] [2  1]]]
+
+//    [[[0  0] [1  0] [1  1] [2  1]]
+//     [[1  0] [0  1] [1  1] [0  2]]]
+
+//    [[[1  0] [2  0] [0  1] [1  1]]
+//     [[0  0] [0  1] [1  1] [1  2]]]
+
+//    [[[1  0] [0  1] [1  1] [2  1]]
+//     [[1  0] [1  1] [2  1] [1  2]]
+//     [[0  1] [1  1] [2  1] [1  2]]
+//     [[1  0] [0  1] [1  1] [1  2]]]
+
+//    [[[0  0] [1  0] [2  0] [3  0]]
+//     [[1 -1] [1  0] [1  1] [1  2]]]]

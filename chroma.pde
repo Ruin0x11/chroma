@@ -26,8 +26,6 @@ int[] fftHold = new int[32];
 float[] fftSmooth = new float[32];
 boolean keys[] = new boolean[4];
 
-boolean useEmulator = true;
-
 final int LIGHTS_WIDTH = 14;
 final int LIGHTS_HEIGHT = 10;
 final int MAGNITUDE = 20;
@@ -42,7 +40,6 @@ Serial portA, portB, portC;
 BufferedImage resizebuffer;
 
 OscP5 control;
-NetAddress myRemoteLocation;
 
 Reflections reflections;
 
@@ -51,6 +48,8 @@ boolean hueCycleable = false;
 float cycleHue = 0;
 
 boolean imgSelected = false;
+
+boolean useEmulator = true; // if true, don't use serial ports
 
 boolean directWrite = false; // if true, select 14 x 10 region as light array instead of 280 x 200 region
 
@@ -66,9 +65,7 @@ ArrayList<Class<? extends Effect>> effectList = new ArrayList();
 SimpleHTTPServer webServer;
 
 void setup() {
-  if (useEmulator) {
-    myRemoteLocation = new NetAddress("127.0.0.1", 11661);
-  } else {
+  if(!useEmulator) {
     // myPort = new Serial(this, "/dev/ttyACM0", 230400);
     portA = new Serial(this, "/dev/ttyACM0", 115200);
     portB = new Serial(this, "/dev/ttyUSB0", 115200);
@@ -156,6 +153,8 @@ void draw () {
 
     // sample effects are drawn in upper PIXEL_WIDTHxPIXEL_HEIGHT half of screen
     colorMode(RGB, 255);
+    rectMode(CORNER);
+    ellipseMode(CENTER);
     noTint();
 
     // step through one frame of the current effect
@@ -273,7 +272,7 @@ void keyPressed() {
     selectEffect();
   }
 
-  // awful hack for lack of multi-key support, in the meantime
+  // awful hack for lack of multi-key support
   if (key == 'w')  keys[0] = true;
   if (key == 's')  keys[1] = true;
   if (key == 'i')  keys[2] = true;
@@ -318,33 +317,16 @@ int[] imgBytes = new int[MAX_LIGHTS*3+4];
 color ledColor;
 
 void sendColors() {
-
-  int sendIndex = 0;
   colorMode(RGB, 254);
 
-  if (useEmulator) {
-    OscMessage myMessage = new OscMessage("/setcolors");
+  if(!useEmulator)
+    sendColorsOld();
+  
+  colorMode(RGB, 255);
+}
 
-    myMessage.add(8);
-    myMessage.add(0);
-    myMessage.add("Chroma");
-    myMessage.add("something");
-    myMessage.add(frameCount);
-    myMessage.add(0);
-    myMessage.add("Ian Pickering");
-    myMessage.add("Chroma for ACM @ UIUC");
-    for (int j = LIGHTS_WIDTH - 1; j >= 0; j--) {
-      for (int i = 0; i < LIGHTS_HEIGHT; i++) {
-        ledColor = effectImage.pixels[j+(i*LIGHTS_WIDTH)];
-        myMessage.add(4*red(ledColor));
-        myMessage.add(4*green(ledColor));
-        myMessage.add(4*blue(ledColor));
-      }
-    }
-
-    /* send the message */
-    control.send(myMessage, myRemoteLocation);
-  } else {
+void sendColorsOld() {
+  int sendIndex = 0;
     for (int j = 0; j < LIGHTS_WIDTH; j++) {
       for (int i = 0; i < LIGHTS_HEIGHT; i++) {
         // sendIndex = procToShiftLkupStatic[i]*3+2;
@@ -376,9 +358,28 @@ void sendColors() {
     }
     toWrite += "W";
     portC.write(toWrite);
-  }
-  colorMode(RGB, 255);
 }
+
+// void sendColorsArduino() {
+//   int sendIndex = 0;
+//   // start packet command
+//   imgBytes[0] = (byte)255;
+//   imgBytes[1] = (byte)0;
+
+//   // serialized pixel data
+//   for (int i = 0; i < 128; i++) {
+//     sendIndex = procToShiftLkupStatic[i]*3+2;
+//     ledColor = effectImage.pixels[i];
+//     imgBytes[sendIndex]=((byte)red(ledColor));
+//     imgBytes[sendIndex+1]=((byte)green(ledColor));
+//     imgBytes[sendIndex+2]=((byte)blue(ledColor));
+//   }
+  
+//   // write LED array commmand
+//   imgBytes[386] = (byte)255;
+//   imgBytes[387] = (byte)254;
+//   portA.write(imgBytes);
+// }
 
 void oscEvent(OscMessage message) {
   try {
