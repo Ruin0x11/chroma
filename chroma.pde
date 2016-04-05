@@ -93,9 +93,18 @@ void setup() {
   Mixer.Info selectedMixer = null;
   for (Mixer.Info info : mixerInfos) {
     println(info);
-    if (info.getName().substring(0, 8).equals("Loopback")) {
-      selectedMixer = info;
-      minim.setInputMixer(AudioSystem.getMixer(selectedMixer));
+    Mixer mixer = AudioSystem.getMixer(info);
+    println("Source lines:");
+    for(Line.Info sourceInfo : mixer.getSourceLineInfo()) {
+      println(sourceInfo);
+    }
+    println("Target lines:");
+    for(Line.Info targetInfo : mixer.getTargetLineInfo()) {
+      println(targetInfo);
+      if (info.getName().substring(0, 8).equals("Loopback")) {
+        selectedMixer = info;
+        minim.setInputMixer(mixer);
+      }
     }
   }
 
@@ -127,14 +136,14 @@ void setup() {
 
   // sort the effect list by effect name
   Collections.sort(effectList, new Comparator<Class>() 
-  {
-     public int compare(Class o1, Class o2) 
-     {
-       EffectManifest manifestA = (EffectManifest)o1.getAnnotation(EffectManifest.class);
-       EffectManifest manifestB = (EffectManifest)o2.getAnnotation(EffectManifest.class);
-       return manifestA.name().compareTo(manifestB.name());
-     }
-  });
+                   {
+                     public int compare(Class o1, Class o2) 
+                     {
+                       EffectManifest manifestA = (EffectManifest)o1.getAnnotation(EffectManifest.class);
+                       EffectManifest manifestB = (EffectManifest)o2.getAnnotation(EffectManifest.class);
+                       return manifestA.name().compareTo(manifestB.name());
+                     }
+    });
 
   selectEffect();
 }
@@ -327,37 +336,37 @@ void sendColors() {
 
 void sendColorsOld() {
   int sendIndex = 0;
-    for (int j = 0; j < LIGHTS_WIDTH; j++) {
-      for (int i = 0; i < LIGHTS_HEIGHT; i++) {
-        // sendIndex = procToShiftLkupStatic[i]*3+2;
-        int index = (i + (j*LIGHTS_HEIGHT));
-        sendIndex = order[index];
-        ledColor = effectImage.pixels[index];
-        imgBytes[sendIndex*3]=((int)red(ledColor));
-        imgBytes[sendIndex*3+1]=((int)green(ledColor));
-        imgBytes[sendIndex*3+2]=((int)blue(ledColor));
-      }
+  for (int j = 0; j < LIGHTS_WIDTH; j++) {
+    for (int i = 0; i < LIGHTS_HEIGHT; i++) {
+      // sendIndex = procToShiftLkupStatic[i]*3+2;
+      int index = (i + (j*LIGHTS_HEIGHT));
+      sendIndex = order[index];
+      ledColor = effectImage.pixels[index];
+      imgBytes[sendIndex*3]=((int)red(ledColor));
+      imgBytes[sendIndex*3+1]=((int)green(ledColor));
+      imgBytes[sendIndex*3+2]=((int)blue(ledColor));
     }
-    // myPort.write(imgBytes);
-    int a = 0;
-    String toWrite = "";
-    for(int i = 0; i < 16; i++) {
-      toWrite += i + " " + imgBytes[a++] + " " + imgBytes[a++] + " " + imgBytes[a++] + "n";
-    }
-    toWrite += "W";
-    portA.write(toWrite);
-    toWrite = "";
-    for(int i = 16; i < 32; i++) {
-      toWrite += (i-16) + " " + imgBytes[a++] + " " + imgBytes[a++] + " " + imgBytes[a++] + "n";
-    }
-    toWrite += "W";
-    portB.write(toWrite);
-    toWrite = "";
-    for(int i = 32; i < 48; i++) {
-      toWrite += (i-32) + " " + imgBytes[a++] + " " + imgBytes[a++] + " " + imgBytes[a++] + "n";
-    }
-    toWrite += "W";
-    portC.write(toWrite);
+  }
+  // myPort.write(imgBytes);
+  int a = 0;
+  String toWrite = "";
+  for(int i = 0; i < 16; i++) {
+    toWrite += i + " " + imgBytes[a++] + " " + imgBytes[a++] + " " + imgBytes[a++] + "n";
+  }
+  toWrite += "W";
+  portA.write(toWrite);
+  toWrite = "";
+  for(int i = 16; i < 32; i++) {
+    toWrite += (i-16) + " " + imgBytes[a++] + " " + imgBytes[a++] + " " + imgBytes[a++] + "n";
+  }
+  toWrite += "W";
+  portB.write(toWrite);
+  toWrite = "";
+  for(int i = 32; i < 48; i++) {
+    toWrite += (i-32) + " " + imgBytes[a++] + " " + imgBytes[a++] + " " + imgBytes[a++] + "n";
+  }
+  toWrite += "W";
+  portC.write(toWrite);
 }
 
 // void sendColorsArduino() {
