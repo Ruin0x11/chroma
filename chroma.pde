@@ -15,6 +15,7 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 import http.*;
+import processing.video.*;
 
 // create global objects and variables
 Minim minim;
@@ -22,6 +23,7 @@ AudioInput in;
 //AudioPlayer in;
 BeatDetect beat;
 FFT fft;
+Capture cam;
 int[] fftHold = new int[32];
 float[] fftSmooth = new float[32];
 boolean keys[] = new boolean[4];
@@ -49,7 +51,7 @@ float cycleHue = 0;
 
 boolean imgSelected = false;
 
-boolean useEmulator = false; // if true, don't use serial ports
+boolean useEmulator = true; // if true, don't use serial ports
 
 boolean directWrite = false; // if true, select 14 x 10 region as light array instead of 280 x 200 region
 
@@ -121,6 +123,23 @@ void setup() {
   fft = new FFT(in.bufferSize(), in.sampleRate());
   fft.window(FFT.HAMMING);
   fft.logAverages(120, 4); // 32 bands
+
+  String[] cameras = Capture.list();
+  
+  if (cameras.length == 0) {
+    println("There are no cameras available for capture.");
+    exit();
+  } else {
+    println("Available cameras:");
+    for (int i = 0; i < cameras.length; i++) {
+      println(cameras[i]);
+    }
+    
+    // The camera can be initialized directly using an 
+    // element from the array returned by list():
+    cam = new Capture(this, cameras[0]);
+    cam.start();     
+  }      
 
   // set canvas size
   surface.setSize(PIXEL_WIDTH, PIXEL_HEIGHT * 2);  
@@ -409,6 +428,11 @@ void oscEvent(OscMessage message) {
   catch (Exception e) {
     e.printStackTrace();
   }
+}
+
+void captureEvent(Capture camera)
+{
+  camera.read();
 }
 
 class TextResponse extends ResponseBuilder {

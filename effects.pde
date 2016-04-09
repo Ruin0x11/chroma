@@ -2174,6 +2174,16 @@ class PongEffect extends Effect {
   }
 }
 
+
+@EffectManifest(name = "Camera",
+                author = "Ian Pickering",
+                description = "Uses a webcam to update the lights.")
+class CameraEffect extends Effect {
+  public void update() {
+    image(cam, 0, 0, width, height);
+  }
+}
+
 // Point[][][] shapes = [[[[0  0] [1  0] [0  1] [1  1]]]
 
 //    [[[0  0] [1  0] [2  0] [2  1]]
