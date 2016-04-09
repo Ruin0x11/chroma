@@ -26,8 +26,8 @@ int[] fftHold = new int[32];
 float[] fftSmooth = new float[32];
 boolean keys[] = new boolean[4];
 
-final int LIGHTS_WIDTH = 14;
-final int LIGHTS_HEIGHT = 10;
+final int LIGHTS_WIDTH = 8;
+final int LIGHTS_HEIGHT = 6;
 final int MAGNITUDE = 20;
 final int MAX_LIGHTS = LIGHTS_WIDTH * LIGHTS_HEIGHT;
 
@@ -49,7 +49,7 @@ float cycleHue = 0;
 
 boolean imgSelected = false;
 
-boolean useEmulator = true; // if true, don't use serial ports
+boolean useEmulator = false; // if true, don't use serial ports
 
 boolean directWrite = false; // if true, select 14 x 10 region as light array instead of 280 x 200 region
 
@@ -101,7 +101,7 @@ void setup() {
     println("Target lines:");
     for(Line.Info targetInfo : mixer.getTargetLineInfo()) {
       println(targetInfo);
-      if (info.getName().substring(0, 8).equals("Loopback")) {
+      if (info.getName().substring(0, 3).equals("PCH")) {
         selectedMixer = info;
         minim.setInputMixer(mixer);
       }
@@ -165,6 +165,8 @@ void draw () {
     rectMode(CORNER);
     ellipseMode(CENTER);
     noTint();
+
+    println(in.mix.get(10));
 
     // step through one frame of the current effect
     currentEffect.update();
