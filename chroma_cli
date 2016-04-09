@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+require 'net/http'
+require 'json'
+require 'osc-ruby'
+
+CHROMA_SERVER = 'siebl-1104-07.acm.illinois.edu'
+
+client = OSC::Client.new( CHROMA_SERVER, 11662 )
+
+if ARGV.empty?
+  response = Net::HTTP.get_response(CHROMA_SERVER, '/list', 8000)
+  effects = JSON.parse(response.body)["effects"]
+  effects.each do |effect| 
+    puts "#{effect["id"]}. #{effect["name"]} (by #{effect["author"]}): #{effect["description"]}"
+  end
+else
+  id = ARGV.shift.to_i
+  client.send( OSC::Message.new( '/switch', id ))
+end
